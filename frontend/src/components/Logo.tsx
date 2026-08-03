@@ -15,13 +15,13 @@ export function Logo({ className = "", showWordmark = true }: LogoProps) {
   return (
     <Link to="/dashboard" className={`flex items-center gap-2 ${className}`}>
       <span className="flex h-8 w-8 items-center justify-center rounded-md bg-white p-1 shadow-sm ring-1 ring-black/5">
-        <img src={logoIcon} alt="OrdeOn" className="h-full w-full object-contain" />
+        <img src={logoIcon} alt="SupplyOR" className="h-full w-full object-contain" />
       </span>
 
       {showWordmark && (
         <span className="text-xl font-extrabold tracking-tight" translate="no">
-          <span className="text-blue-800 dark:text-blue-400">Orde</span>
-          <span className="text-orange-500">On</span>
+          <span className="text-blue-800 dark:text-blue-400">Supply</span>
+          <span className="text-orange-500">OR</span>
         </span>
       )}
     </Link>
