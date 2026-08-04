@@ -109,6 +109,31 @@ authRouter.post(
   })
 );
 
+const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1),
+  newPassword: z.string().min(8),
+});
+
+// Qualquer usuário logado pode trocar a própria senha (ex: senha inicial definida pelo admin)
+authRouter.patch(
+  "/password",
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const body = changePasswordSchema.parse(req.body);
+
+    const user = await prisma.user.findUnique({ where: { id: req.user!.userId } });
+    if (!user) throw new ApiError(404, "Usuário não encontrado");
+
+    const valid = await bcrypt.compare(body.currentPassword, user.passwordHash);
+    if (!valid) throw new ApiError(401, "Senha atual incorreta");
+
+    const passwordHash = await bcrypt.hash(body.newPassword, 10);
+    await prisma.user.update({ where: { id: user.id }, data: { passwordHash } });
+
+    res.status(204).send();
+  })
+);
+
 authRouter.get(
   "/me",
   requireAuth,

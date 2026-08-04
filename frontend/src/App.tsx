@@ -18,6 +18,7 @@ import { DashboardPage } from "./pages/DashboardPage";
 import { SuppliersPage } from "./pages/SuppliersPage";
 import { SupplierDetailPage } from "./pages/SupplierDetailPage";
 import { PriceHistoryPage } from "./pages/PriceHistoryPage";
+import { ChangePasswordPage } from "./pages/ChangePasswordPage";
 
 export default function App() {
   return (
@@ -36,6 +37,7 @@ export default function App() {
               <Route path="/pedidos" element={<RequestsListPage />} />
               <Route path="/pedidos/novo" element={<RequestCreatePage />} />
               <Route path="/pedidos/:id" element={<RequestDetailPage />} />
+              <Route path="/minha-conta/senha" element={<ChangePasswordPage />} />
 
               <Route element={<ProtectedRoute roles={["admin", "comprador"]} />}>
                 <Route path="/fornecedores" element={<SuppliersPage />} />

@@ -34,7 +34,11 @@ export function Layout() {
               <span className="text-base font-bold leading-none">+</span> Novo pedido
             </Link>
             <NotificationCenter />
-            <div className="flex items-center gap-2">
+            <Link
+              to="/minha-conta/senha"
+              className="flex items-center gap-2 rounded-md px-1.5 py-1 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+              title="Alterar senha"
+            >
               <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-700 text-sm font-semibold text-white dark:bg-blue-600">
                 {user.name.charAt(0).toUpperCase()}
               </span>
@@ -42,7 +46,7 @@ export function Layout() {
                 <div className="font-medium">{user.name}</div>
                 <div className="text-neutral-500 dark:text-neutral-400">{user.role}</div>
               </div>
-            </div>
+            </Link>
             <button
               onClick={logout}
               className="rounded-md border border-neutral-300 px-3 py-1.5 font-medium text-neutral-700 hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-800"
