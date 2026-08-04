@@ -569,6 +569,27 @@ export function RequestDetailPage() {
         </div>
       )}
 
+      {(request.status === "aguardando_entrega" ||
+        request.status === "aguardando_retirada" ||
+        request.deliveryNotes) && (
+        <div className={cardClass}>
+          <h2 className="mb-3 text-sm font-semibold text-neutral-700 dark:text-neutral-300">
+            {request.status === "aguardando_retirada" ? "Informações de retirada" : "Informações de entrega"}
+          </h2>
+          {request.deliveryNotes ? (
+            <p className="whitespace-pre-wrap text-sm text-neutral-700 dark:text-neutral-300">
+              {request.deliveryNotes}
+            </p>
+          ) : (
+            <p className="text-sm text-neutral-500 dark:text-neutral-400">Nenhuma observação registrada ainda.</p>
+          )}
+          {canAdvanceStatus &&
+            (request.status === "aguardando_entrega" || request.status === "aguardando_retirada") && (
+              <DeliveryNotesForm requestId={id!} deliveryNotes={request.deliveryNotes} onSaved={load} />
+            )}
+        </div>
+      )}
+
       {canAdvanceStatus && statusOptions.length > 0 && (
         <div className={cardClass}>
           <h2 className="mb-3 text-sm font-semibold text-neutral-700 dark:text-neutral-300">Avançar status</h2>
@@ -645,6 +666,50 @@ function QuoteDeadlineForm({
       <button type="button" disabled={saving} onClick={save} className={buttonSecondaryClass}>
         Salvar prazo
       </button>
+    </div>
+  );
+}
+
+function DeliveryNotesForm({
+  requestId,
+  deliveryNotes,
+  onSaved,
+}: {
+  requestId: string;
+  deliveryNotes: string | null;
+  onSaved: () => void;
+}) {
+  const [value, setValue] = useState(deliveryNotes ?? "");
+  const [saving, setSaving] = useState(false);
+
+  async function save() {
+    setSaving(true);
+    try {
+      await api.patch(`/purchase-requests/${requestId}/delivery-notes`, {
+        deliveryNotes: value.trim() ? value.trim() : null,
+      });
+      onSaved();
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="mt-4 space-y-2 border-t border-neutral-200 pt-4 dark:border-neutral-800">
+      <label className={labelClass}>
+        Endereço, horário, contato da transportadora ou local de retirada
+      </label>
+      <textarea
+        rows={3}
+        className={inputClass}
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+      />
+      <div className="flex justify-end">
+        <button type="button" disabled={saving} onClick={save} className={buttonSecondaryClass}>
+          Salvar observações
+        </button>
+      </div>
     </div>
   );
 }

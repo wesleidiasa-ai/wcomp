@@ -135,6 +135,7 @@ export type PurchaseRequestSummary = {
 export type PurchaseRequestDetail = PurchaseRequestSummary & {
   justification: string | null;
   quoteDeadline: string | null;
+  deliveryNotes: string | null;
   items: PurchaseRequestItem[];
   approvalSteps: ApprovalStep[];
   quotes: Quote[];

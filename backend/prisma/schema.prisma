@@ -146,6 +146,7 @@ model PurchaseRequest {
   estimatedTotal Decimal? @map("estimated_total")
   status         String   @default("aguardando_aprovacao")
   quoteDeadline  DateTime? @map("quote_deadline") // prazo pra fechar a cotação, opcional
+  deliveryNotes  String?  @map("delivery_notes") // observações de entrega/retirada, visíveis ao solicitante
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @default(now()) @updatedAt @map("updated_at")
 

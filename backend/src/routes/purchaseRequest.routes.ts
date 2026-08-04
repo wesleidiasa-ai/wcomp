@@ -304,6 +304,33 @@ purchaseRequestRouter.patch(
   })
 );
 
+const deliveryNotesSchema = z.object({ deliveryNotes: z.string().max(2000).nullable() });
+
+purchaseRequestRouter.patch(
+  "/:id/delivery-notes",
+  requireRole("comprador", "admin"),
+  asyncHandler(async (req, res) => {
+    const body = deliveryNotesSchema.parse(req.body);
+
+    const existing = await prisma.purchaseRequest.findFirst({
+      where: { id: req.params.id, companyId: req.user!.companyId },
+    });
+    if (!existing) throw new ApiError(404, "Pedido não encontrado");
+    if (!["aguardando_entrega", "aguardando_retirada"].includes(existing.status)) {
+      throw new ApiError(
+        409,
+        "Só é possível registrar observações de entrega/retirada enquanto o pedido está aguardando entrega ou retirada"
+      );
+    }
+
+    const updated = await prisma.purchaseRequest.update({
+      where: { id: existing.id },
+      data: { deliveryNotes: body.deliveryNotes },
+    });
+    res.json(updated);
+  })
+);
+
 const quoteSchema = z.object({
   supplierId: z.string().uuid().optional(),
   supplierName: z.string().min(1).optional(),
