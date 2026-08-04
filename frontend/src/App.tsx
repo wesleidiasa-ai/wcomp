@@ -5,6 +5,8 @@ import { Layout } from "./components/Layout";
 import { LandingPage } from "./pages/LandingPage";
 import { LoginPage } from "./pages/LoginPage";
 import { RegisterCompanyPage } from "./pages/RegisterCompanyPage";
+import { AdminWaitlistPage } from "./pages/AdminWaitlistPage";
+import { AdminCreateCompanyPage } from "./pages/AdminCreateCompanyPage";
 import { RequestsListPage } from "./pages/RequestsListPage";
 import { RequestDetailPage } from "./pages/RequestDetailPage";
 import { RequestCreatePage } from "./pages/RequestCreatePage";
@@ -25,6 +27,8 @@ export default function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/registrar" element={<RegisterCompanyPage />} />
+          <Route path="/admin/waitlist" element={<AdminWaitlistPage />} />
+          <Route path="/admin/criar-empresa" element={<AdminCreateCompanyPage />} />
 
           <Route element={<ProtectedRoute />}>
             <Route element={<Layout />}>

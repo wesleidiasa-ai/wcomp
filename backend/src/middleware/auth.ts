@@ -26,3 +26,13 @@ export function requireRole(...roles: string[]) {
     next();
   };
 }
+
+// Protege rotas internas da plataforma (fora do escopo de empresa) com uma chave compartilhada,
+// enquanto o cadastro de novas empresas é feito só por convite manual.
+export function requirePlatformAdminKey(req: Request, _res: Response, next: NextFunction) {
+  const key = req.headers["x-admin-key"];
+  if (!process.env.PLATFORM_ADMIN_KEY || key !== process.env.PLATFORM_ADMIN_KEY) {
+    throw new ApiError(401, "Chave de administrador inválida");
+  }
+  next();
+}

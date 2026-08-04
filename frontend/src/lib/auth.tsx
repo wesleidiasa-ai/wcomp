@@ -11,14 +11,6 @@ type AuthContextValue = {
   token: string | null;
   ready: boolean;
   login: (email: string, password: string) => Promise<void>;
-  registerCompany: (input: {
-    companyName: string;
-    cnpj?: string;
-    adminName: string;
-    adminEmail: string;
-    adminPhone?: string;
-    password: string;
-  }) => Promise<void>;
   logout: () => void;
 };
 
@@ -64,24 +56,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     persist(data);
   }
 
-  async function registerCompany(input: {
-    companyName: string;
-    cnpj?: string;
-    adminName: string;
-    adminEmail: string;
-    adminPhone?: string;
-    password: string;
-  }) {
-    const data = await api.post<{ token: string; user: Omit<AuthUser, "companyId" | "departmentId"> & { companyId?: string }; company: { id: string } }>(
-      "/auth/register-company",
-      input
-    );
-    persist({
-      token: data.token,
-      user: { ...data.user, companyId: data.company.id, departmentId: null } as AuthUser,
-    });
-  }
-
   function logout() {
     localStorage.removeItem(STORAGE_KEY);
     setAuthToken(null);
@@ -90,7 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, token, ready, login, registerCompany, logout }}>
+    <AuthContext.Provider value={{ user, token, ready, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

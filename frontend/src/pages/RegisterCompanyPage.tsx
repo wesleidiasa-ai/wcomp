@@ -1,25 +1,22 @@
 import { useState, type FormEvent } from "react";
-import { Link, Navigate, useNavigate } from "react-router-dom";
-import { useAuth } from "../lib/auth";
-import { ApiError } from "../lib/api";
+import { Link } from "react-router-dom";
+import { api, ApiError } from "../lib/api";
 import { buttonPrimaryClass, cardClass, inputClass, labelClass } from "../components/ui";
 
 export function RegisterCompanyPage() {
-  const { user, registerCompany } = useAuth();
-  const navigate = useNavigate();
   const [form, setForm] = useState({
     companyName: "",
-    adminName: "",
-    adminEmail: "",
-    password: "",
+    contactName: "",
+    email: "",
+    phone: "",
+    message: "",
   });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-
-  if (user) return <Navigate to="/dashboard" replace />;
+  const [sent, setSent] = useState(false);
 
   function update(field: keyof typeof form) {
-    return (e: React.ChangeEvent<HTMLInputElement>) =>
+    return (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
       setForm((prev) => ({ ...prev, [field]: e.target.value }));
   }
 
@@ -28,23 +25,47 @@ export function RegisterCompanyPage() {
     setError(null);
     setLoading(true);
     try {
-      await registerCompany(form);
-      navigate("/dashboard");
+      await api.post("/access-requests", {
+        ...form,
+        phone: form.phone || undefined,
+        message: form.message || undefined,
+      });
+      setSent(true);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Não foi possível criar a empresa");
+      setError(err instanceof ApiError ? err.message : "Não foi possível enviar seu pedido");
     } finally {
       setLoading(false);
     }
   }
 
+  if (sent) {
+    return (
+      <div className="flex min-h-svh items-center justify-center bg-neutral-50 px-4 dark:bg-neutral-950">
+        <div className={`w-full max-w-sm text-center ${cardClass}`}>
+          <h1 className="mb-2 text-xl font-semibold text-neutral-900 dark:text-neutral-100">
+            Pedido recebido!
+          </h1>
+          <p className="text-sm text-neutral-500 dark:text-neutral-400">
+            Recebemos seu pedido de acesso. Vamos entrar em contato em breve pelo e-mail ou telefone que você
+            informou.
+          </p>
+          <Link to="/" className="mt-5 inline-block text-sm font-medium text-blue-700 underline dark:text-blue-400">
+            Voltar para o início
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex min-h-svh items-center justify-center bg-neutral-50 px-4 dark:bg-neutral-950">
+    <div className="flex min-h-svh items-center justify-center bg-neutral-50 px-4 py-10 dark:bg-neutral-950">
       <div className={`w-full max-w-sm ${cardClass}`}>
         <h1 className="mb-1 text-xl font-semibold text-neutral-900 dark:text-neutral-100">
-          Criar empresa
+          Solicitar acesso
         </h1>
         <p className="mb-5 text-sm text-neutral-500 dark:text-neutral-400">
-          Isso cria a empresa e o seu usuário administrador
+          Estamos liberando o acesso aos poucos enquanto evoluímos a plataforma. Preencha seus dados que entramos
+          em contato pra configurar sua empresa.
         </p>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -53,32 +74,23 @@ export function RegisterCompanyPage() {
           </div>
           <div>
             <label className={labelClass}>Seu nome</label>
-            <input required className={inputClass} value={form.adminName} onChange={update("adminName")} />
+            <input required className={inputClass} value={form.contactName} onChange={update("contactName")} />
           </div>
           <div>
             <label className={labelClass}>Seu e-mail</label>
-            <input
-              type="email"
-              required
-              className={inputClass}
-              value={form.adminEmail}
-              onChange={update("adminEmail")}
-            />
+            <input type="email" required className={inputClass} value={form.email} onChange={update("email")} />
           </div>
           <div>
-            <label className={labelClass}>Senha (mín. 8 caracteres)</label>
-            <input
-              type="password"
-              required
-              minLength={8}
-              className={inputClass}
-              value={form.password}
-              onChange={update("password")}
-            />
+            <label className={labelClass}>Telefone (opcional)</label>
+            <input className={inputClass} value={form.phone} onChange={update("phone")} />
+          </div>
+          <div>
+            <label className={labelClass}>Conte um pouco do que você precisa (opcional)</label>
+            <textarea rows={3} className={inputClass} value={form.message} onChange={update("message")} />
           </div>
           {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
           <button type="submit" disabled={loading} className={`w-full ${buttonPrimaryClass}`}>
-            {loading ? "Criando..." : "Criar empresa"}
+            {loading ? "Enviando..." : "Solicitar acesso"}
           </button>
         </form>
         <p className="mt-4 text-center text-sm text-neutral-500 dark:text-neutral-400">

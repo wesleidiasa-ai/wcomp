@@ -65,7 +65,7 @@ export function LoginPage() {
         <p className="mt-4 text-center text-sm text-neutral-500 dark:text-neutral-400">
           Ainda não tem empresa cadastrada?{" "}
           <Link to="/registrar" className="font-medium text-neutral-900 underline dark:text-neutral-100">
-            Criar empresa
+            Solicitar acesso
           </Link>
         </p>
       </div>

@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { prisma } from "../lib/prisma";
 import { asyncHandler } from "../middleware/asyncHandler";
-import { requireAuth } from "../middleware/auth";
+import { requireAuth, requirePlatformAdminKey } from "../middleware/auth";
 import { ApiError } from "../middleware/errorHandler";
 import { signToken } from "../utils/jwt";
 
@@ -18,9 +18,12 @@ const registerCompanySchema = z.object({
   password: z.string().min(8),
 });
 
-// Cria a empresa (tenant) e o primeiro usuário admin
+// Cria a empresa (tenant) e o primeiro usuário admin.
+// Só quem tem a chave de administrador da plataforma pode chamar — cadastro é por convite manual,
+// não existe auto-cadastro público enquanto não há cobrança.
 authRouter.post(
   "/register-company",
+  requirePlatformAdminKey,
   asyncHandler(async (req, res) => {
     const body = registerCompanySchema.parse(req.body);
 

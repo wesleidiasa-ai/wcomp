@@ -260,3 +260,16 @@ model Notification {
 
   @@map("notifications")
 }
+
+// Pedido de acesso à plataforma (lista de espera) — não cria empresa/usuário automaticamente
+model AccessRequest {
+  id          String   @id @default(uuid()) @db.Uuid
+  companyName String   @map("company_name")
+  contactName String   @map("contact_name")
+  email       String
+  phone       String?
+  message     String?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("access_requests")
+}

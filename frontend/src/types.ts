@@ -212,6 +212,16 @@ export type PriceHistoryItem = {
   years: PriceHistoryYear[];
 };
 
+export type AccessRequest = {
+  id: string;
+  companyName: string;
+  contactName: string;
+  email: string;
+  phone: string | null;
+  message: string | null;
+  createdAt: string;
+};
+
 export type PendingNotifications = {
   pendingApprovals: number;
   pendingQuotes: number;

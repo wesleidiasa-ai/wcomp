@@ -93,7 +93,7 @@ export function LandingPage() {
               Entrar
             </Link>
             <Link to="/registrar" className={buttonAccentClass}>
-              Criar empresa
+              Solicitar acesso
             </Link>
           </div>
         </div>
@@ -112,7 +112,7 @@ export function LandingPage() {
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <Link to="/registrar" className={`${buttonAccentClass} px-6 py-3 text-base`}>
-                Criar empresa
+                Solicitar acesso
               </Link>
               <Link to="/login" className={`${buttonSecondaryClass} px-6 py-3 text-base`}>
                 Já tenho conta
@@ -199,10 +199,10 @@ export function LandingPage() {
         <SectionInner className="flex flex-col items-center gap-6 text-center">
           <h2 className="text-2xl font-bold sm:text-3xl">Organize as compras da sua empresa agora</h2>
           <p className="max-w-xl text-blue-100">
-            Cadastre sua empresa e comece a usar o SupplyOR — sem precisar migrar planilha nenhuma.
+            Estamos liberando o acesso aos poucos. Peça o seu e a gente configura sua empresa.
           </p>
           <Link to="/registrar" className="rounded-md bg-white px-6 py-3 text-base font-medium text-blue-700 hover:bg-blue-50">
-            Criar empresa
+            Solicitar acesso
           </Link>
         </SectionInner>
       </Section>

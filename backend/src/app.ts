@@ -1,6 +1,7 @@
 import cors from "cors";
 import express from "express";
 import { errorHandler } from "./middleware/errorHandler";
+import { accessRequestRouter } from "./routes/accessRequest.routes";
 import { authRouter } from "./routes/auth.routes";
 import { companyRouter } from "./routes/company.routes";
 import { dashboardRouter } from "./routes/dashboard.routes";
@@ -28,6 +29,7 @@ app.use(
 app.get("/health", (_req, res) => res.json({ ok: true }));
 
 app.use("/auth", authRouter);
+app.use("/access-requests", accessRequestRouter);
 app.use("/companies", companyRouter);
 app.use("/dashboard", dashboardRouter);
 app.use("/departments", departmentRouter);
