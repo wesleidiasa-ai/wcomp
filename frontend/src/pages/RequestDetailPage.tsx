@@ -22,6 +22,14 @@ function formatMoney(value: string | null) {
   return Number(value).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
+function formatMoneyNumber(value: number) {
+  return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+}
+
+function quoteTotal(quote: { totalPrice: string; freightValue: string | null }) {
+  return Number(quote.totalPrice) + Number(quote.freightValue ?? 0);
+}
+
 function formatDateTime(value: string) {
   return new Date(value).toLocaleString("pt-BR");
 }
@@ -365,6 +373,7 @@ export function RequestDetailPage() {
                     <th className="py-2 pr-3 font-medium">Fornecedor</th>
                     <th className="py-2 pr-3 font-medium">Valor</th>
                     <th className="py-2 pr-3 font-medium">Frete</th>
+                    <th className="py-2 pr-3 font-medium">Total</th>
                     <th className="py-2 pr-3 font-medium">Prazo</th>
                     <th className="py-2 pr-3 font-medium">Condição</th>
                     <th className="py-2 pr-3 font-medium">Escolhido</th>
@@ -372,19 +381,33 @@ export function RequestDetailPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {request.quotes.map((quote) => (
-                    <Fragment key={quote.id}>
-                      <tr
-                        className={`border-b border-neutral-100 dark:border-neutral-800 ${
-                          quote.selected ? "bg-emerald-50 dark:bg-emerald-900/20" : ""
-                        }`}
-                      >
-                        <td className="py-2 pr-3 font-medium">
-                          {quote.supplier?.rating ? `${quote.supplierName} (${"★".repeat(quote.supplier.rating)})` : quote.supplierName}
-                        </td>
-                        <td className="py-2 pr-3">{formatMoney(quote.totalPrice)}</td>
-                        <td className="py-2 pr-3">{quote.freightValue ? formatMoney(quote.freightValue) : "—"}</td>
-                        <td className="py-2 pr-3">{quote.deliveryDays !== null ? `${quote.deliveryDays}d` : "—"}</td>
+                  {(() => {
+                    const minTotal =
+                      request.quotes.length > 1 ? Math.min(...request.quotes.map(quoteTotal)) : null;
+                    return request.quotes.map((quote) => {
+                      const total = quoteTotal(quote);
+                      const isCheapest = minTotal !== null && total === minTotal;
+                      return (
+                        <Fragment key={quote.id}>
+                          <tr
+                            className={`border-b border-neutral-100 dark:border-neutral-800 ${
+                              quote.selected ? "bg-emerald-50 dark:bg-emerald-900/20" : ""
+                            }`}
+                          >
+                            <td className="py-2 pr-3 font-medium">
+                              {quote.supplier?.rating ? `${quote.supplierName} (${"★".repeat(quote.supplier.rating)})` : quote.supplierName}
+                            </td>
+                            <td className="py-2 pr-3">{formatMoney(quote.totalPrice)}</td>
+                            <td className="py-2 pr-3">{quote.freightValue ? formatMoney(quote.freightValue) : "—"}</td>
+                            <td className="py-2 pr-3 font-medium">
+                              {formatMoneyNumber(total)}
+                              {isCheapest && (
+                                <span className="ml-2 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400">
+                                  Menor valor
+                                </span>
+                              )}
+                            </td>
+                            <td className="py-2 pr-3">{quote.deliveryDays !== null ? `${quote.deliveryDays}d` : "—"}</td>
                         <td className="py-2 pr-3 text-neutral-500 dark:text-neutral-400">{quote.notes ?? "—"}</td>
                         <td className="py-2 pr-3">
                           {quote.selected ? (
@@ -416,7 +439,7 @@ export function RequestDetailPage() {
                         )}
                       </tr>
                       <tr key={`${quote.id}-attachments`} className="border-b border-neutral-100 dark:border-neutral-800">
-                        <td colSpan={canManageQuotes ? 7 : 6} className="pb-2 pl-0">
+                        <td colSpan={canManageQuotes ? 8 : 7} className="pb-2 pl-0">
                           <div className="flex flex-wrap items-center gap-3 pl-0 text-xs">
                             {quote.attachments.map((attachment) => (
                               <span key={attachment.id} className="flex items-center gap-1">
@@ -456,8 +479,10 @@ export function RequestDetailPage() {
                           </div>
                         </td>
                       </tr>
-                    </Fragment>
-                  ))}
+                        </Fragment>
+                      );
+                    });
+                  })()}
                 </tbody>
               </table>
             </div>
@@ -515,12 +540,16 @@ export function RequestDetailPage() {
                   />
                 </div>
                 <div className="col-span-2">
-                  <label className={labelClass}>Condição (pagamento, observações)</label>
-                  <input
+                  <label className={labelClass}>Condição de pagamento</label>
+                  <select
                     className={inputClass}
                     value={quoteForm.notes}
                     onChange={(e) => setQuoteForm({ ...quoteForm, notes: e.target.value })}
-                  />
+                  >
+                    <option value="">Selecione...</option>
+                    <option value="À vista">À vista</option>
+                    <option value="A prazo">A prazo</option>
+                  </select>
                 </div>
               </div>
               <div className="flex justify-end">
