@@ -3,6 +3,11 @@ import { useAuth } from "../lib/auth";
 import { Logo } from "../components/Logo";
 import { buttonAccentClass, buttonSecondaryClass } from "../components/ui";
 
+const WHATSAPP_NUMBER = "5562999349523";
+const WHATSAPP_LINK = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
+  "Olá! Vi o SupplyOR e queria saber mais."
+)}`;
+
 const PAIN_POINTS = [
   {
     icon: "📱",
@@ -213,6 +218,18 @@ export function LandingPage() {
           </Link>
         </div>
       </footer>
+
+      <a
+        href={WHATSAPP_LINK}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Falar no WhatsApp"
+        className="fixed bottom-6 right-6 z-20 flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg transition-transform hover:scale-105"
+      >
+        <svg viewBox="0 0 32 32" className="h-7 w-7" fill="currentColor" aria-hidden="true">
+          <path d="M16.004 3C9.377 3 4 8.373 4 15c0 2.386.7 4.61 1.902 6.478L4 29l7.72-1.867A11.94 11.94 0 0 0 16.004 27C22.63 27 28 21.627 28 15S22.63 3 16.004 3Zm6.977 16.94c-.297.836-1.47 1.53-2.406 1.727-.64.135-1.475.243-4.287-.92-3.598-1.49-5.914-5.14-6.095-5.379-.174-.239-1.463-1.949-1.463-3.719 0-1.77.928-2.639 1.257-3.001.33-.362.72-.453.96-.453.24 0 .48.003.69.013.222.01.52-.084.812.62.297.72 1.01 2.49 1.098 2.671.087.181.146.394.03.633-.116.239-.174.388-.348.596-.174.207-.365.463-.522.622-.174.174-.355.362-.153.71.203.349.902 1.49 1.936 2.412 1.33 1.187 2.452 1.554 2.8 1.729.35.174.554.145.76-.087.207-.232.878-1.026 1.113-1.378.235-.352.47-.29.79-.174.32.116 2.036.96 2.386 1.135.348.174.58.261.667.406.087.146.087.848-.21 1.684Z" />
+        </svg>
+      </a>
     </div>
   );
 }
