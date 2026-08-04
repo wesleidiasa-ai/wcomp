@@ -22,7 +22,10 @@ const detailInclude = {
   items: true,
   approvalSteps: {
     orderBy: { stepOrder: "asc" as const },
-    include: { approver: { select: { id: true, name: true, email: true } } },
+    include: {
+      approver: { select: { id: true, name: true, email: true } },
+      decidedBy: { select: { id: true, name: true, email: true } },
+    },
   },
   quotes: {
     orderBy: { createdAt: "asc" as const },

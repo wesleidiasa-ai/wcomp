@@ -33,12 +33,14 @@ function buildEvents(request: PurchaseRequestDetail): TimelineEvent[] {
 
   for (const step of request.approvalSteps) {
     if (!step.decidedAt) continue;
+    const deciderName = step.decidedBy?.name ?? step.approver.name;
+    const isOverride = step.decidedBy && step.decidedBy.id !== step.approverId;
+    const verb = step.status === "aprovado" ? "aprovou" : "reprovou";
     events.push({
       at: step.decidedAt,
-      label:
-        step.status === "aprovado"
-          ? `${step.approver.name} aprovou a etapa ${step.stepOrder}`
-          : `${step.approver.name} reprovou a etapa ${step.stepOrder}`,
+      label: `${deciderName} ${verb} a etapa ${step.stepOrder}${
+        isOverride ? ` (no lugar de ${step.approver.name})` : ""
+      }`,
       note: step.comment,
       tone: step.status === "aprovado" ? "done" : "rejected",
     });

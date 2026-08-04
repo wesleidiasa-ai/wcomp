@@ -122,7 +122,12 @@ export async function decideApprovalStep(db: Db, input: DecideInput) {
 
   await db.approvalStep.update({
     where: { id: step.id },
-    data: { status: input.decision, comment: input.comment, decidedAt: new Date() },
+    data: {
+      status: input.decision,
+      comment: input.comment,
+      decidedAt: new Date(),
+      decidedById: input.actingUserId,
+    },
   });
 
   const request = await db.purchaseRequest.findUniqueOrThrow({ where: { id: input.requestId } });

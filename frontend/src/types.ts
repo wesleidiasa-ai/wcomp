@@ -85,6 +85,7 @@ export type ApprovalStep = {
   comment: string | null;
   decidedAt: string | null;
   approver: { id: string; name: string; email: string };
+  decidedBy: { id: string; name: string; email: string } | null;
 };
 
 export type StatusHistoryEntry = {

@@ -319,6 +319,11 @@ export function RequestDetailPage() {
               <li key={step.id} className="flex items-center justify-between rounded-md border border-neutral-200 px-3 py-2 text-sm dark:border-neutral-800">
                 <span>
                   Etapa {step.stepOrder} · {step.approver.name}
+                  {step.decidedBy && step.decidedBy.id !== step.approverId && (
+                    <span className="ml-2 text-neutral-500 dark:text-neutral-400">
+                      (decidido por {step.decidedBy.name})
+                    </span>
+                  )}
                   {step.comment && <span className="ml-2 text-neutral-500 dark:text-neutral-400">"{step.comment}"</span>}
                 </span>
                 <span
