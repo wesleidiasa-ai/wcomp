@@ -98,7 +98,19 @@ purchaseRequestRouter.get(
         requester: { select: { name: true, email: true } },
         department: true,
         items: true,
-        quotes: { where: { selected: true } },
+        quotes: {
+          where: { selected: true },
+          include: {
+            createdBy: { select: { name: true } },
+            supplier: { select: { cnpj: true, phone: true, email: true } },
+          },
+        },
+        approvalSteps: {
+          include: {
+            approver: { select: { name: true } },
+            decidedBy: { select: { name: true } },
+          },
+        },
       },
     });
     if (!request) throw new ApiError(404, "Pedido não encontrado");
