@@ -95,20 +95,11 @@ purchaseRequestRouter.get(
       where: { id: req.params.id, companyId: req.user!.companyId },
       include: {
         company: true,
-        requester: { select: { name: true, email: true } },
-        department: true,
         items: true,
         quotes: {
           where: { selected: true },
           include: {
-            createdBy: { select: { name: true } },
             supplier: { select: { cnpj: true, phone: true, email: true } },
-          },
-        },
-        approvalSteps: {
-          include: {
-            approver: { select: { name: true } },
-            decidedBy: { select: { name: true } },
           },
         },
       },

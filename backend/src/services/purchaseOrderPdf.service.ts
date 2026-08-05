@@ -24,8 +24,6 @@ type PdfRequest = {
     addressState: string | null;
     addressZipCode: string | null;
   };
-  requester: { name: string };
-  department: { name: string } | null;
   items: { itemName: string; quantity: Money; unit: string | null; estimatedUnitPrice: Money }[];
   quotes: {
     selected: boolean;
@@ -34,10 +32,8 @@ type PdfRequest = {
     freightValue: Money;
     deliveryDays: number | null;
     notes: string | null;
-    createdBy: { name: string } | null;
     supplier: { cnpj: string | null; phone: string | null; email: string | null } | null;
   }[];
-  approvalSteps: { status: string; approver: { name: string }; decidedBy: { name: string } | null }[];
 };
 
 const MONTHS_PT = [
@@ -51,9 +47,9 @@ const GREY_LINE = "#d1d5db";
 const BLACK = "#111111";
 
 const PAGE_LEFT = 36;
-const PAGE_RIGHT = 559;
+const PAGE_RIGHT = 806; // A4 paisagem (841.89pt de largura) menos a margem
 const PAGE_WIDTH = PAGE_RIGHT - PAGE_LEFT;
-const BOTTOM_LIMIT = 780;
+const BOTTOM_LIMIT = 500; // A4 paisagem tem só 595.28pt de altura
 
 function toNumber(value: Money) {
   return value === null ? 0 : Number(value.toString());
@@ -116,7 +112,7 @@ function gridRow(
 }
 
 export function generatePurchaseOrderPdf(request: PdfRequest): PDFKit.PDFDocument {
-  const doc = new PDFDocument({ margin: 36, size: "A4" });
+  const doc = new PDFDocument({ margin: 36, size: "A4", layout: "landscape" });
   const selectedQuote = request.quotes.find((q) => q.selected) ?? null;
   const now = new Date();
 
@@ -137,11 +133,6 @@ export function generatePurchaseOrderPdf(request: PdfRequest): PDFKit.PDFDocumen
     .fontSize(16)
     .fillColor(BLACK)
     .text(`Pedido nº ${request.requestNumber ?? "—"}`, PAGE_LEFT, headerTop, { width: PAGE_WIDTH, align: "right" });
-  doc
-    .font("Helvetica")
-    .fontSize(8)
-    .fillColor(GREY_LABEL)
-    .text(request.title, PAGE_LEFT, doc.y, { width: PAGE_WIDTH, align: "right" });
 
   doc.fillColor(BLACK);
   doc.y = Math.max(doc.y, headerTop + 60) + 8;
@@ -176,8 +167,9 @@ export function generatePurchaseOrderPdf(request: PdfRequest): PDFKit.PDFDocumen
   ]);
   doc.y = y + 12;
 
-  // Tabela de itens
-  const cols = { desc: 260, qty: 55, unit: 55, unitPrice: 75, total: 75 };
+  // Tabela de itens — a descrição absorve a largura extra da página em paisagem
+  const fixedCols = { qty: 55, unit: 55, unitPrice: 90, total: 90 };
+  const cols = { desc: PAGE_WIDTH - fixedCols.qty - fixedCols.unit - fixedCols.unitPrice - fixedCols.total, ...fixedCols };
   const xDesc = PAGE_LEFT;
   const xQty = xDesc + cols.desc;
   const xUnit = xQty + cols.qty;
@@ -270,17 +262,6 @@ export function generatePurchaseOrderPdf(request: PdfRequest): PDFKit.PDFDocumen
   const rightX = PAGE_LEFT + halfWidth;
   doc.rect(rightX, footerY, halfWidth, footerHeight).strokeColor(GREY_LINE).lineWidth(0.75).stroke();
   doc.font("Helvetica-Bold").fontSize(8).fillColor(GREY_LABEL).text("DADOS ADICIONAIS", rightX + 6, footerY + 6);
-  doc.font("Helvetica").fontSize(8.5).fillColor(BLACK);
-  doc.text(`Solicitante: ${request.requester.name}`, rightX + 6, footerY + 18, { width: halfWidth - 12 });
-  doc.text(`Setor: ${request.department?.name ?? "—"}`, rightX + 6, doc.y, { width: halfWidth - 12 });
-  doc.text(`Urgência: ${request.urgency}`, rightX + 6, doc.y, { width: halfWidth - 12 });
-  const buyerName = selectedQuote?.createdBy?.name ?? request.requester.name;
-  doc.text(`Comprador: ${buyerName}`, rightX + 6, doc.y, { width: halfWidth - 12 });
-  const approvedBy = request.approvalSteps
-    .filter((s) => s.status === "aprovado")
-    .map((s) => s.decidedBy?.name ?? s.approver.name)
-    .join(", ");
-  if (approvedBy) doc.text(`Aprovado por: ${approvedBy}`, rightX + 6, doc.y, { width: halfWidth - 12 });
 
   doc.y = footerY + footerHeight + 30;
   doc
