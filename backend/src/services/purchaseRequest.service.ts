@@ -39,6 +39,11 @@ export async function createPurchaseRequest(input: CreatePurchaseRequestInput) {
     input.items.reduce((sum, item) => sum + item.quantity * (item.estimatedUnitPrice ?? 0), 0);
 
   return prisma.$transaction(async (tx) => {
+    const company = await tx.company.update({
+      where: { id: input.companyId },
+      data: { requestCounter: { increment: 1 } },
+    });
+
     const created = await tx.purchaseRequest.create({
       data: {
         companyId: input.companyId,
@@ -48,6 +53,7 @@ export async function createPurchaseRequest(input: CreatePurchaseRequestInput) {
         justification: input.justification,
         urgency: input.urgency,
         estimatedTotal: computedTotal,
+        requestNumber: company.requestCounter,
         items: { create: input.items },
       },
     });

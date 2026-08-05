@@ -107,6 +107,9 @@ export function RequestsListPage() {
                 >
                   <td className="px-4 py-3">
                     <Link to={`/pedidos/${r.id}`} className="font-medium hover:underline">
+                      {r.requestNumber && (
+                        <span className="text-neutral-400 dark:text-neutral-500">#{r.requestNumber} · </span>
+                      )}
                       {r.title}
                     </Link>
                   </td>

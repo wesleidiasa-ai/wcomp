@@ -212,6 +212,22 @@ export function RequestDetailPage() {
     }
   }
 
+  async function downloadPdf() {
+    if (!id) return;
+    setError(null);
+    try {
+      const blob = await api.getBlob(`/purchase-requests/${id}/pdf`);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `pedido-${request?.requestNumber ?? id}.pdf`;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Não foi possível gerar o PDF");
+    }
+  }
+
   async function openAttachment(quoteId: string, attachment: QuoteAttachment) {
     setError(null);
     try {
@@ -259,13 +275,25 @@ export function RequestDetailPage() {
       <div className={cardClass}>
         <div className="mb-3 flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-xl font-semibold">{request.title}</h1>
+            <h1 className="text-xl font-semibold">
+              {request.requestNumber && (
+                <span className="text-neutral-400 dark:text-neutral-500">Nº {request.requestNumber} · </span>
+              )}
+              {request.title}
+            </h1>
             <p className="text-sm text-neutral-500 dark:text-neutral-400">
               Solicitado por {request.requester.name} · {request.department?.name ?? "sem setor"} ·{" "}
               {formatDateTime(request.createdAt)}
             </p>
           </div>
-          <StatusBadge status={request.status} />
+          <div className="flex items-center gap-3">
+            {canAdvanceStatus && request.quotes.some((q) => q.selected) && (
+              <button onClick={downloadPdf} className={buttonSecondaryClass}>
+                📄 Gerar PDF
+              </button>
+            )}
+            <StatusBadge status={request.status} />
+          </div>
         </div>
         {request.justification && (
           <p className="mb-3 text-sm text-neutral-700 dark:text-neutral-300">{request.justification}</p>

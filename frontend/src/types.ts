@@ -122,6 +122,7 @@ export type Quote = {
 
 export type PurchaseRequestSummary = {
   id: string;
+  requestNumber: number | null;
   title: string;
   urgency: Urgency;
   status: RequestStatus;

@@ -11,6 +11,7 @@ import { ApiError } from "../middleware/errorHandler";
 import { upload } from "../middleware/upload";
 import { decideApprovalStep } from "../services/approvalEngine.service";
 import { createPurchaseRequest } from "../services/purchaseRequest.service";
+import { generatePurchaseOrderPdf } from "../services/purchaseOrderPdf.service";
 
 export const purchaseRequestRouter = Router();
 
@@ -83,6 +84,34 @@ purchaseRequestRouter.get(
     }
 
     res.json(request);
+  })
+);
+
+purchaseRequestRouter.get(
+  "/:id/pdf",
+  requireRole("comprador", "admin"),
+  asyncHandler(async (req, res) => {
+    const request = await prisma.purchaseRequest.findFirst({
+      where: { id: req.params.id, companyId: req.user!.companyId },
+      include: {
+        company: true,
+        requester: { select: { name: true, email: true } },
+        department: true,
+        items: true,
+        quotes: { where: { selected: true } },
+      },
+    });
+    if (!request) throw new ApiError(404, "Pedido não encontrado");
+
+    const doc = generatePurchaseOrderPdf(request);
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="pedido-${request.requestNumber ?? request.id}.pdf"`
+    );
+    doc.pipe(res);
+    doc.end();
   })
 );
 
