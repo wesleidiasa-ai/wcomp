@@ -14,4 +14,9 @@ export const ALLOWED_MIME_TYPES: Record<string, string> = {
   "application/pdf": ".pdf",
 };
 
+export const LOGO_MIME_TYPES: Record<string, string> = {
+  "image/png": ".png",
+  "image/jpeg": ".jpg",
+};
+
 export const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;

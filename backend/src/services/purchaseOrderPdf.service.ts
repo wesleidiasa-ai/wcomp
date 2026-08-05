@@ -23,6 +23,7 @@ type PdfRequest = {
     addressCity: string | null;
     addressState: string | null;
     addressZipCode: string | null;
+    logo: Buffer | null;
   };
   items: { itemName: string; quantity: Money; unit: string | null; estimatedUnitPrice: Money }[];
   quotes: {
@@ -116,17 +117,28 @@ export function generatePurchaseOrderPdf(request: PdfRequest): PDFKit.PDFDocumen
   const selectedQuote = request.quotes.find((q) => q.selected) ?? null;
   const now = new Date();
 
-  // Cabeçalho: dados da empresa à esquerda, número do pedido em destaque à direita
+  // Cabeçalho: logo (se houver) + dados da empresa à esquerda, número do pedido em destaque à direita
   const headerTop = doc.y;
-  doc.font("Helvetica-Bold").fontSize(13).fillColor(BLUE).text(request.company.name, PAGE_LEFT, headerTop, {
+  const LOGO_SIZE = 46;
+  let textLeft = PAGE_LEFT;
+  if (request.company.logo) {
+    try {
+      doc.image(request.company.logo, PAGE_LEFT, headerTop, { fit: [LOGO_SIZE, LOGO_SIZE] });
+      textLeft = PAGE_LEFT + LOGO_SIZE + 10;
+    } catch {
+      // logo corrompido ou em formato inesperado — segue sem ele em vez de quebrar o PDF
+    }
+  }
+
+  doc.font("Helvetica-Bold").fontSize(13).fillColor(BLUE).text(request.company.name, textLeft, headerTop, {
     width: 340,
   });
   doc.font("Helvetica").fontSize(8).fillColor(GREY_LABEL);
   const addressLine = companyAddressLine(request.company);
-  if (addressLine) doc.text(addressLine, PAGE_LEFT, doc.y, { width: 340 });
+  if (addressLine) doc.text(addressLine, textLeft, doc.y, { width: 340 });
   const cityLine = companyCityLine(request.company);
-  if (cityLine) doc.text(cityLine, PAGE_LEFT, doc.y, { width: 340 });
-  if (request.company.cnpj) doc.text(`CNPJ ${request.company.cnpj}`, PAGE_LEFT, doc.y, { width: 340 });
+  if (cityLine) doc.text(cityLine, textLeft, doc.y, { width: 340 });
+  if (request.company.cnpj) doc.text(`CNPJ ${request.company.cnpj}`, textLeft, doc.y, { width: 340 });
 
   doc
     .font("Helvetica-Bold")

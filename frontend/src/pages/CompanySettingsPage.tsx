@@ -37,15 +37,23 @@ function toForm(company: Company): FormState {
 
 export function CompanySettingsPage() {
   const [form, setForm] = useState<FormState | null>(null);
+  const [hasLogo, setHasLogo] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    api
+  function loadCompany() {
+    return api
       .get<Company>("/companies/me")
-      .then((company) => setForm(toForm(company)))
+      .then((company) => {
+        setForm(toForm(company));
+        setHasLogo(company.hasLogo);
+      })
       .catch((err) => setError(err instanceof ApiError ? err.message : "Erro ao carregar dados da empresa"));
+  }
+
+  useEffect(() => {
+    loadCompany();
   }, []);
 
   function update(field: keyof FormState) {
@@ -65,6 +73,7 @@ export function CompanySettingsPage() {
         whatsappPhoneNumberId: form.whatsappPhoneNumberId || null,
       });
       setForm(toForm(updated));
+      setHasLogo(updated.hasLogo);
       setSuccess(true);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Não foi possível salvar os dados da empresa");
@@ -110,6 +119,14 @@ export function CompanySettingsPage() {
             <label className={labelClass}>E-mail</label>
             <input type="email" className={inputClass} value={form.email} onChange={update("email")} />
           </div>
+        </div>
+
+        <div className="border-t border-neutral-200 pt-4 dark:border-neutral-800">
+          <h2 className="mb-1 text-sm font-semibold text-neutral-700 dark:text-neutral-300">Logo da empresa</h2>
+          <p className="mb-3 text-sm text-neutral-500 dark:text-neutral-400">
+            Aparece no PDF do pedido de compra gerado pra enviar aos fornecedores. Envie um PNG ou JPEG.
+          </p>
+          <LogoUploader hasLogo={hasLogo} onChange={setHasLogo} />
         </div>
 
         <div className="border-t border-neutral-200 pt-4 dark:border-neutral-800">
@@ -180,6 +197,88 @@ export function CompanySettingsPage() {
           </button>
         </div>
       </form>
+    </div>
+  );
+}
+
+function LogoUploader({ hasLogo, onChange }: { hasLogo: boolean; onChange: (hasLogo: boolean) => void }) {
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!hasLogo) {
+      setPreviewUrl(null);
+      return;
+    }
+    let objectUrl: string | null = null;
+    api
+      .getBlob("/companies/me/logo")
+      .then((blob) => {
+        objectUrl = URL.createObjectURL(blob);
+        setPreviewUrl(objectUrl);
+      })
+      .catch(() => {});
+    return () => {
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [hasLogo]);
+
+  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+
+    setError(null);
+    setBusy(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      await api.upload("/companies/me/logo", formData);
+      onChange(true);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Não foi possível enviar o logo");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleRemove() {
+    setError(null);
+    setBusy(true);
+    try {
+      await api.delete("/companies/me/logo");
+      onChange(false);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Não foi possível remover o logo");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="flex items-center gap-4">
+      <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-md border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900">
+        {previewUrl ? (
+          <img src={previewUrl} alt="Logo da empresa" className="h-full w-full object-contain p-1" />
+        ) : (
+          <span className="text-xs text-neutral-400">sem logo</span>
+        )}
+      </div>
+      <div className="space-y-1">
+        <div className="flex items-center gap-3 text-sm">
+          <label className="cursor-pointer font-medium text-blue-700 hover:underline dark:text-blue-400">
+            {hasLogo ? "Trocar logo" : "Enviar logo"}
+            <input type="file" accept="image/png,image/jpeg" className="hidden" disabled={busy} onChange={handleFile} />
+          </label>
+          {hasLogo && (
+            <button type="button" disabled={busy} onClick={handleRemove} className="text-red-600 dark:text-red-400">
+              Remover
+            </button>
+          )}
+        </div>
+        {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+      </div>
     </div>
   );
 }

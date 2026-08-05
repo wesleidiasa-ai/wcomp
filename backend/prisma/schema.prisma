@@ -24,6 +24,8 @@ model Company {
   plan                String   @default("trial") // trial, basico, pro
   whatsappPhoneNumberId String? @unique @map("whatsapp_phone_number_id") // phone_number_id do WhatsApp Business desta empresa, usado pra rotear o webhook
   requestCounter      Int      @default(0) @map("request_counter") // contador pra numerar os pedidos desta empresa (1, 2, 3...)
+  logo                Bytes?   // guardado no banco (não em disco) pra sobreviver a redeploys
+  logoMimeType        String?  @map("logo_mime_type")
   createdAt           DateTime @default(now()) @map("created_at")
 
   departments      Department[]

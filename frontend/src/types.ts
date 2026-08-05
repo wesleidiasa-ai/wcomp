@@ -43,6 +43,7 @@ export type Company = {
   addressZipCode: string | null;
   plan: string;
   whatsappPhoneNumberId: string | null;
+  hasLogo: boolean;
   createdAt: string;
 };
 
