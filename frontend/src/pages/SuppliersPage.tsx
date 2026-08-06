@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { api, ApiError } from "../lib/api";
+import { formatCnpj, formatPhone } from "../lib/format";
 import type { Supplier } from "../types";
 import { buttonPrimaryClass, cardClass, inputClass, labelClass } from "../components/ui";
 
@@ -56,11 +57,21 @@ export function SuppliersPage() {
         </div>
         <div>
           <label className={labelClass}>CNPJ</label>
-          <input className={inputClass} value={form.cnpj} onChange={(e) => setForm({ ...form, cnpj: e.target.value })} />
+          <input
+            className={inputClass}
+            placeholder="00.000.000/0001-00"
+            value={form.cnpj}
+            onChange={(e) => setForm({ ...form, cnpj: formatCnpj(e.target.value) })}
+          />
         </div>
         <div>
           <label className={labelClass}>Telefone</label>
-          <input className={inputClass} value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+          <input
+            className={inputClass}
+            placeholder="(00) 00000-0000"
+            value={form.phone}
+            onChange={(e) => setForm({ ...form, phone: formatPhone(e.target.value) })}
+          />
         </div>
         <div>
           <label className={labelClass}>E-mail</label>
