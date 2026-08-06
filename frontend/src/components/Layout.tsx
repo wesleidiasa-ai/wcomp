@@ -46,6 +46,10 @@ export function Layout() {
                   <Link to="/minha-conta/senha" className="text-blue-700 hover:underline dark:text-blue-400">
                     Alterar senha
                   </Link>
+                  <span aria-hidden="true">·</span>
+                  <Link to="/feedback" className="text-blue-700 hover:underline dark:text-blue-400">
+                    💡 Feedback
+                  </Link>
                 </div>
               </div>
             </div>

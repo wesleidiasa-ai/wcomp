@@ -34,6 +34,7 @@ model Company {
   purchaseRequests PurchaseRequest[]
   suppliers        Supplier[]
   whatsappSessions WhatsAppSession[]
+  feedback         Feedback[]
 
   @@map("companies")
 }
@@ -95,6 +96,7 @@ model User {
   quotesRegistered        Quote[]
   attachmentsUploaded     QuoteAttachment[]
   whatsappSessions        WhatsAppSession[]
+  feedbackSent            Feedback[]
 
   @@map("users")
 }
@@ -283,4 +285,19 @@ model AccessRequest {
   createdAt   DateTime @default(now()) @map("created_at")
 
   @@map("access_requests")
+}
+
+// Sugestão ou problema reportado por um usuário de dentro do sistema, vai direto pro admin da plataforma
+model Feedback {
+  id        String   @id @default(uuid()) @db.Uuid
+  companyId String   @map("company_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  type      String // sugestao, problema
+  message   String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  company Company @relation(fields: [companyId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@map("feedback")
 }

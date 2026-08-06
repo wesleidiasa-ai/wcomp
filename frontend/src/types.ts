@@ -226,6 +226,17 @@ export type AccessRequest = {
   createdAt: string;
 };
 
+export type FeedbackType = "sugestao" | "problema";
+
+export type FeedbackEntry = {
+  id: string;
+  type: FeedbackType;
+  message: string;
+  createdAt: string;
+  company: { name: string };
+  user: { name: string; email: string };
+};
+
 export type PendingNotifications = {
   pendingApprovals: number;
   pendingQuotes: number;

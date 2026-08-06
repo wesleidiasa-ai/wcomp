@@ -7,6 +7,7 @@ import { LoginPage } from "./pages/LoginPage";
 import { RegisterCompanyPage } from "./pages/RegisterCompanyPage";
 import { AdminWaitlistPage } from "./pages/AdminWaitlistPage";
 import { AdminCreateCompanyPage } from "./pages/AdminCreateCompanyPage";
+import { AdminFeedbackPage } from "./pages/AdminFeedbackPage";
 import { RequestsListPage } from "./pages/RequestsListPage";
 import { RequestDetailPage } from "./pages/RequestDetailPage";
 import { RequestCreatePage } from "./pages/RequestCreatePage";
@@ -19,6 +20,7 @@ import { SuppliersPage } from "./pages/SuppliersPage";
 import { SupplierDetailPage } from "./pages/SupplierDetailPage";
 import { PriceHistoryPage } from "./pages/PriceHistoryPage";
 import { ChangePasswordPage } from "./pages/ChangePasswordPage";
+import { FeedbackPage } from "./pages/FeedbackPage";
 
 export default function App() {
   return (
@@ -30,6 +32,7 @@ export default function App() {
           <Route path="/registrar" element={<RegisterCompanyPage />} />
           <Route path="/admin/waitlist" element={<AdminWaitlistPage />} />
           <Route path="/admin/criar-empresa" element={<AdminCreateCompanyPage />} />
+          <Route path="/admin/feedback" element={<AdminFeedbackPage />} />
 
           <Route element={<ProtectedRoute />}>
             <Route element={<Layout />}>
@@ -38,6 +41,7 @@ export default function App() {
               <Route path="/pedidos/novo" element={<RequestCreatePage />} />
               <Route path="/pedidos/:id" element={<RequestDetailPage />} />
               <Route path="/minha-conta/senha" element={<ChangePasswordPage />} />
+              <Route path="/feedback" element={<FeedbackPage />} />
 
               <Route element={<ProtectedRoute roles={["admin", "comprador"]} />}>
                 <Route path="/fornecedores" element={<SuppliersPage />} />
