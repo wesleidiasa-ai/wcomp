@@ -40,17 +40,7 @@ export function Layout() {
               </span>
               <div className="text-right">
                 <div className="font-medium">{user.name}</div>
-                <div className="flex items-center gap-1.5 text-neutral-500 dark:text-neutral-400">
-                  <span>{user.role}</span>
-                  <span aria-hidden="true">·</span>
-                  <Link to="/minha-conta/senha" className="text-blue-700 hover:underline dark:text-blue-400">
-                    Alterar senha
-                  </Link>
-                  <span aria-hidden="true">·</span>
-                  <Link to="/feedback" className="text-blue-700 hover:underline dark:text-blue-400">
-                    💡 Feedback
-                  </Link>
-                </div>
+                <div className="text-neutral-500 dark:text-neutral-400">{user.role}</div>
               </div>
             </div>
             <button
@@ -107,6 +97,16 @@ export function Layout() {
                 </NavLink>
               </>
             )}
+
+            <div className="mt-3 mb-1 px-3 text-xs font-semibold uppercase tracking-wide text-neutral-400 dark:text-neutral-600">
+              Conta
+            </div>
+            <NavLink to="/minha-conta/senha" className={linkClass}>
+              <NavIcon>🔒</NavIcon> Alterar senha
+            </NavLink>
+            <NavLink to="/feedback" className={linkClass}>
+              <NavIcon>💡</NavIcon> Feedback
+            </NavLink>
           </nav>
         </aside>
 
