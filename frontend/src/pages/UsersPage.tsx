@@ -12,11 +12,17 @@ const ROLES: { value: Role; label: string }[] = [
 
 const EMPTY_FORM = { name: "", email: "", phone: "", role: "solicitante" as Role, departmentId: "", password: "" };
 
+const EMPTY_EDIT_FORM = { name: "", phone: "", role: "solicitante" as Role, departmentId: "" };
+
 export function UsersPage() {
   const [users, setUsers] = useState<User[] | null>(null);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [form, setForm] = useState(EMPTY_FORM);
   const [error, setError] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState(EMPTY_EDIT_FORM);
+  const [editError, setEditError] = useState<string | null>(null);
+  const [editLoading, setEditLoading] = useState(false);
 
   function load() {
     api.get<User[]>("/users").then(setUsers).catch(() => {});
@@ -55,6 +61,41 @@ export function UsersPage() {
       load();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Não foi possível remover o usuário");
+    }
+  }
+
+  function startEdit(u: User) {
+    setEditingId(u.id);
+    setEditError(null);
+    setEditForm({
+      name: u.name,
+      phone: u.phone ?? "",
+      role: u.role,
+      departmentId: u.departmentId ?? "",
+    });
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
+    setEditError(null);
+  }
+
+  async function handleSaveEdit(id: string) {
+    setEditError(null);
+    setEditLoading(true);
+    try {
+      await api.patch(`/users/${id}`, {
+        name: editForm.name,
+        phone: editForm.phone || undefined,
+        role: editForm.role,
+        departmentId: editForm.departmentId || null,
+      });
+      setEditingId(null);
+      load();
+    } catch (err) {
+      setEditError(err instanceof ApiError ? err.message : "Não foi possível salvar as alterações");
+    } finally {
+      setEditLoading(false);
     }
   }
 
@@ -148,19 +189,84 @@ export function UsersPage() {
                 </td>
               </tr>
             ) : (
-              users.map((u) => (
-                <tr key={u.id} className="border-b border-neutral-100 last:border-0 dark:border-neutral-800">
-                  <td className="px-4 py-3">{u.name}</td>
-                  <td className="px-4 py-3">{u.email}</td>
-                  <td className="px-4 py-3 capitalize">{u.role}</td>
-                  <td className="px-4 py-3">{departmentName(u.departmentId)}</td>
-                  <td className="px-4 py-3 text-right">
-                    <button className="text-red-600 dark:text-red-400" onClick={() => handleDelete(u.id)}>
-                      Remover
-                    </button>
-                  </td>
-                </tr>
-              ))
+              users.map((u) =>
+                editingId === u.id ? (
+                  <tr key={u.id} className="border-b border-neutral-100 last:border-0 dark:border-neutral-800">
+                    <td className="px-4 py-3">
+                      <input
+                        className={inputClass}
+                        value={editForm.name}
+                        onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                      />
+                    </td>
+                    <td className="px-4 py-3 text-neutral-500 dark:text-neutral-400">{u.email}</td>
+                    <td className="px-4 py-3">
+                      <select
+                        className={inputClass}
+                        value={editForm.role}
+                        onChange={(e) => setEditForm({ ...editForm, role: e.target.value as Role })}
+                      >
+                        {ROLES.map((r) => (
+                          <option key={r.value} value={r.value}>
+                            {r.label}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
+                    <td className="px-4 py-3">
+                      <select
+                        className={inputClass}
+                        value={editForm.departmentId}
+                        onChange={(e) => setEditForm({ ...editForm, departmentId: e.target.value })}
+                      >
+                        <option value="">Sem setor</option>
+                        {departments.map((d) => (
+                          <option key={d.id} value={d.id}>
+                            {d.name}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <div className="flex flex-col items-end gap-1">
+                        <div className="flex gap-3">
+                          <button
+                            className="font-medium text-blue-700 disabled:opacity-50 dark:text-blue-400"
+                            disabled={editLoading}
+                            onClick={() => handleSaveEdit(u.id)}
+                          >
+                            Salvar
+                          </button>
+                          <button className="text-neutral-500 dark:text-neutral-400" onClick={cancelEdit}>
+                            Cancelar
+                          </button>
+                        </div>
+                        {editError && <p className="text-xs text-red-600 dark:text-red-400">{editError}</p>}
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
+                  <tr key={u.id} className="border-b border-neutral-100 last:border-0 dark:border-neutral-800">
+                    <td className="px-4 py-3">{u.name}</td>
+                    <td className="px-4 py-3">{u.email}</td>
+                    <td className="px-4 py-3 capitalize">{u.role}</td>
+                    <td className="px-4 py-3">{departmentName(u.departmentId)}</td>
+                    <td className="px-4 py-3 text-right">
+                      <div className="flex justify-end gap-3">
+                        <button
+                          className="font-medium text-blue-700 dark:text-blue-400"
+                          onClick={() => startEdit(u)}
+                        >
+                          Editar
+                        </button>
+                        <button className="text-red-600 dark:text-red-400" onClick={() => handleDelete(u.id)}>
+                          Remover
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                )
+              )
             )}
           </tbody>
         </table>
