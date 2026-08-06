@@ -43,12 +43,6 @@ export function Layout() {
                 <div className="text-neutral-500 dark:text-neutral-400">{user.role}</div>
               </div>
             </div>
-            <button
-              onClick={logout}
-              className="rounded-md border border-neutral-300 px-3 py-1.5 font-medium text-neutral-700 hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-800"
-            >
-              Sair
-            </button>
           </div>
         </div>
       </header>
@@ -107,6 +101,12 @@ export function Layout() {
             <NavLink to="/feedback" className={linkClass}>
               <NavIcon>💡</NavIcon> Feedback
             </NavLink>
+            <button
+              onClick={logout}
+              className="flex items-center gap-2 rounded-md px-3 py-2 text-left text-sm font-medium text-neutral-600 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-800"
+            >
+              <NavIcon>🚪</NavIcon> Sair
+            </button>
           </nav>
         </aside>
 
