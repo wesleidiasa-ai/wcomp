@@ -40,7 +40,7 @@ export function Layout() {
               </span>
               <div className="text-right">
                 <div className="font-medium">{user.name}</div>
-                <div className="text-neutral-500 dark:text-neutral-400">{user.role}</div>
+                <div className="capitalize text-neutral-500 dark:text-neutral-400">{user.role}</div>
               </div>
             </div>
           </div>
