@@ -26,6 +26,8 @@ model Company {
   requestCounter      Int      @default(0) @map("request_counter") // contador pra numerar os pedidos desta empresa (1, 2, 3...)
   logo                Bytes?   // guardado no banco (não em disco) pra sobreviver a redeploys
   logoMimeType        String?  @map("logo_mime_type")
+  active              Boolean  @default(true) // desativada = ninguém da empresa consegue logar
+  maxUsers            Int?     @map("max_users") // limite de usuários; null = sem limite
   createdAt           DateTime @default(now()) @map("created_at")
 
   departments      Department[]
@@ -82,6 +84,9 @@ model User {
   phone        String? // pra WhatsApp
   role         String
   passwordHash String   @map("password_hash")
+  mustChangePassword    Boolean   @default(false) @map("must_change_password")
+  passwordResetTokenHash String? @map("password_reset_token_hash")
+  passwordResetExpiresAt DateTime? @map("password_reset_expires_at")
   createdAt    DateTime @default(now()) @map("created_at")
 
   company    Company     @relation(fields: [companyId], references: [id])

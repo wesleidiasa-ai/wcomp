@@ -5,6 +5,7 @@ import { prisma } from "../lib/prisma";
 import { asyncHandler } from "../middleware/asyncHandler";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { ApiError } from "../middleware/errorHandler";
+import { sendWelcomeEmail } from "../services/emailTemplates.service";
 import { ROLES } from "../utils/roles";
 
 export const userRouter = Router();
@@ -71,6 +72,20 @@ userRouter.post(
     const existing = await prisma.user.findUnique({ where: { email: body.email } });
     if (existing) throw new ApiError(409, "Já existe um usuário com este e-mail");
 
+    const company = await prisma.company.findUniqueOrThrow({
+      where: { id: req.user!.companyId },
+      select: { name: true, maxUsers: true },
+    });
+    if (company.maxUsers !== null) {
+      const userCount = await prisma.user.count({ where: { companyId: req.user!.companyId } });
+      if (userCount >= company.maxUsers) {
+        throw new ApiError(
+          409,
+          `Sua empresa atingiu o limite de ${company.maxUsers} usuário(s). Fale com o suporte pra aumentar.`
+        );
+      }
+    }
+
     const passwordHash = await bcrypt.hash(body.password, 10);
 
     const user = await prisma.user.create({
@@ -82,9 +97,12 @@ userRouter.post(
         role: body.role,
         departmentId: body.departmentId,
         passwordHash,
+        mustChangePassword: true,
       },
       select: userSelect,
     });
+
+    await sendWelcomeEmail({ to: user.email, name: user.name, companyName: company.name, password: body.password });
 
     res.status(201).json(user);
   })

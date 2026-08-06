@@ -1,8 +1,10 @@
 import { useState, type FormEvent } from "react";
 import { api, ApiError } from "../lib/api";
+import { useAuth } from "../lib/auth";
 import { buttonPrimaryClass, cardClass, inputClass, labelClass } from "../components/ui";
 
 export function ChangePasswordPage() {
+  const { user, clearMustChangePassword } = useAuth();
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -27,6 +29,7 @@ export function ChangePasswordPage() {
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
+      clearMustChangePassword();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Não foi possível trocar a senha");
     } finally {
@@ -37,6 +40,11 @@ export function ChangePasswordPage() {
   return (
     <div className="mx-auto max-w-sm space-y-4">
       <h1 className="text-xl font-semibold">Alterar senha</h1>
+      {user?.mustChangePassword && (
+        <p className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-300">
+          Esse é seu primeiro acesso — troque a senha provisória por uma de sua escolha antes de continuar.
+        </p>
+      )}
 
       <form onSubmit={handleSubmit} className={`space-y-4 ${cardClass}`}>
         <div>

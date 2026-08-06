@@ -67,7 +67,8 @@ function CreateCompanyForm({ adminKey, onUnauthorized }: { adminKey: string; onU
       {created && (
         <div className={`${cardClass} border-emerald-300 bg-emerald-50 dark:border-emerald-900 dark:bg-emerald-950`}>
           <p className="font-medium text-emerald-800 dark:text-emerald-300">
-            Empresa "{created.companyName}" criada. Envie estes dados de acesso pro cliente:
+            Empresa "{created.companyName}" criada. Já mandamos um e-mail de boas-vindas com esses dados, mas
+            você também pode repassar direto:
           </p>
           <p className="mt-2 text-sm text-emerald-900 dark:text-emerald-200">
             E-mail: <span className="font-mono">{created.email}</span>

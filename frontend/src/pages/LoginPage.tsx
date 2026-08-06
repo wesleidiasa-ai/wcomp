@@ -48,7 +48,12 @@ export function LoginPage() {
             />
           </div>
           <div>
-            <label className={labelClass}>Senha</label>
+            <div className="mb-1 flex items-center justify-between">
+              <label className={labelClass}>Senha</label>
+              <Link to="/esqueci-senha" className="text-xs font-medium text-blue-700 hover:underline dark:text-blue-400">
+                Esqueci minha senha
+              </Link>
+            </div>
             <input
               type="password"
               required

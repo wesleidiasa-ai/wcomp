@@ -12,6 +12,7 @@ type AuthContextValue = {
   ready: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
+  clearMustChangePassword: () => void;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -63,8 +64,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setToken(null);
   }
 
+  function clearMustChangePassword() {
+    setUser((prev) => {
+      if (!prev) return prev;
+      const next = { ...prev, mustChangePassword: false };
+      const stored = loadStoredAuth();
+      if (stored) localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...stored, user: next }));
+      return next;
+    });
+  }
+
   return (
-    <AuthContext.Provider value={{ user, token, ready, login, logout }}>
+    <AuthContext.Provider value={{ user, token, ready, login, logout, clearMustChangePassword }}>
       {children}
     </AuthContext.Provider>
   );

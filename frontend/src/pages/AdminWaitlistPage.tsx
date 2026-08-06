@@ -79,6 +79,9 @@ export function AdminWaitlistPage() {
               <Link to="/admin/feedback" className="font-medium text-blue-700 hover:underline dark:text-blue-400">
                 Feedback →
               </Link>
+              <Link to="/admin/empresas" className="font-medium text-blue-700 hover:underline dark:text-blue-400">
+                Empresas →
+              </Link>
               <button onClick={clearKey} className="text-neutral-500 hover:underline dark:text-neutral-400">
                 Sair
               </button>

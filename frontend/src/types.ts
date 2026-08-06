@@ -20,6 +20,7 @@ export type AuthUser = {
   role: Role;
   companyId: string;
   departmentId: string | null;
+  mustChangePassword: boolean;
 };
 
 export type Department = {
@@ -235,6 +236,18 @@ export type FeedbackEntry = {
   createdAt: string;
   company: { name: string };
   user: { name: string; email: string };
+};
+
+export type AdminCompany = {
+  id: string;
+  name: string;
+  cnpj: string | null;
+  email: string | null;
+  plan: string;
+  active: boolean;
+  maxUsers: number | null;
+  userCount: number;
+  createdAt: string;
 };
 
 export type PendingNotifications = {

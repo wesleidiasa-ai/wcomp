@@ -116,6 +116,9 @@ export function UsersPage() {
             value={form.password}
             onChange={(e) => setForm({ ...form, password: e.target.value })}
           />
+          <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+            Enviamos essa senha por e-mail pro usuário; no primeiro acesso ele vai precisar trocá-la.
+          </p>
         </div>
         <div className="col-span-2 flex justify-end">
           <button type="submit" className={buttonPrimaryClass}>

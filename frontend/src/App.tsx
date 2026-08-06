@@ -8,6 +8,9 @@ import { RegisterCompanyPage } from "./pages/RegisterCompanyPage";
 import { AdminWaitlistPage } from "./pages/AdminWaitlistPage";
 import { AdminCreateCompanyPage } from "./pages/AdminCreateCompanyPage";
 import { AdminFeedbackPage } from "./pages/AdminFeedbackPage";
+import { AdminCompaniesPage } from "./pages/AdminCompaniesPage";
+import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
+import { ResetPasswordPage } from "./pages/ResetPasswordPage";
 import { RequestsListPage } from "./pages/RequestsListPage";
 import { RequestDetailPage } from "./pages/RequestDetailPage";
 import { RequestCreatePage } from "./pages/RequestCreatePage";
@@ -30,9 +33,12 @@ export default function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/registrar" element={<RegisterCompanyPage />} />
+          <Route path="/esqueci-senha" element={<ForgotPasswordPage />} />
+          <Route path="/redefinir-senha" element={<ResetPasswordPage />} />
           <Route path="/admin/waitlist" element={<AdminWaitlistPage />} />
           <Route path="/admin/criar-empresa" element={<AdminCreateCompanyPage />} />
           <Route path="/admin/feedback" element={<AdminFeedbackPage />} />
+          <Route path="/admin/empresas" element={<AdminCompaniesPage />} />
 
           <Route element={<ProtectedRoute />}>
             <Route element={<Layout />}>
