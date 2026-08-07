@@ -7,7 +7,7 @@ import { requireAuth, requirePlatformAdminKey } from "../middleware/auth";
 export const feedbackRouter = Router();
 
 const feedbackSchema = z.object({
-  type: z.enum(["sugestao", "problema"]),
+  type: z.enum(["bug", "melhoria", "duvida", "elogio"]),
   message: z.string().min(1).max(4000),
 });
 

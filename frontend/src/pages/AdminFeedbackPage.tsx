@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { AdminKeyGate } from "../components/AdminKeyGate";
+import { AdminNav } from "../components/AdminNav";
 import { api, ApiError } from "../lib/api";
 import { cardClass } from "../components/ui";
 import type { FeedbackEntry } from "../types";
@@ -10,6 +10,11 @@ function formatDate(iso: string) {
 }
 
 const TYPE_LABEL: Record<string, string> = {
+  bug: "🐞 Bug",
+  melhoria: "💡 Melhoria",
+  duvida: "❓ Dúvida",
+  elogio: "🎉 Elogio",
+  // valores antigos, mantidos pra não quebrar feedback já registrado
   sugestao: "💡 Sugestão",
   problema: "🐞 Problema",
 };
@@ -64,21 +69,9 @@ export function AdminFeedbackPage() {
   return (
     <AdminKeyGate>
       {(adminKey, clearKey) => (
-        <div className="mx-auto max-w-3xl space-y-4 px-6 py-10">
-          <div className="flex items-center justify-between">
-            <h1 className="text-xl font-semibold">Sugestões e problemas</h1>
-            <div className="flex items-center gap-4 text-sm">
-              <Link to="/admin/waitlist" className="font-medium text-blue-700 hover:underline dark:text-blue-400">
-                Lista de espera →
-              </Link>
-              <Link to="/admin/empresas" className="font-medium text-blue-700 hover:underline dark:text-blue-400">
-                Empresas →
-              </Link>
-              <button onClick={clearKey} className="text-neutral-500 hover:underline dark:text-neutral-400">
-                Sair
-              </button>
-            </div>
-          </div>
+        <div className="mx-auto max-w-4xl px-6 py-10">
+          <h1 className="mb-4 text-xl font-semibold">Sugestões e problemas</h1>
+          <AdminNav onLogout={clearKey} />
           <FeedbackList adminKey={adminKey} onUnauthorized={clearKey} />
         </div>
       )}

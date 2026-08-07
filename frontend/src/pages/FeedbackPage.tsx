@@ -4,12 +4,14 @@ import type { FeedbackType } from "../types";
 import { buttonPrimaryClass, cardClass, inputClass, labelClass } from "../components/ui";
 
 const TYPES: { value: FeedbackType; label: string }[] = [
-  { value: "sugestao", label: "💡 Sugestão" },
-  { value: "problema", label: "🐞 Problema" },
+  { value: "bug", label: "🐞 Bug" },
+  { value: "melhoria", label: "💡 Melhoria" },
+  { value: "duvida", label: "❓ Dúvida" },
+  { value: "elogio", label: "🎉 Elogio" },
 ];
 
 export function FeedbackPage() {
-  const [type, setType] = useState<FeedbackType>("sugestao");
+  const [type, setType] = useState<FeedbackType>("melhoria");
   const [message, setMessage] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -44,13 +46,13 @@ export function FeedbackPage() {
       <form onSubmit={handleSubmit} className={`space-y-4 ${cardClass}`}>
         <div>
           <label className={labelClass}>Tipo</label>
-          <div className="flex gap-3">
+          <div className="grid grid-cols-2 gap-2">
             {TYPES.map((t) => (
               <button
                 key={t.value}
                 type="button"
                 onClick={() => setType(t.value)}
-                className={`flex-1 rounded-md border px-3 py-2 text-sm font-medium ${
+                className={`rounded-md border px-3 py-2 text-sm font-medium ${
                   type === t.value
                     ? "border-blue-600 bg-blue-50 text-blue-700 dark:border-blue-500 dark:bg-blue-900/30 dark:text-blue-400"
                     : "border-neutral-300 text-neutral-600 hover:bg-neutral-50 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800"
@@ -70,7 +72,13 @@ export function FeedbackPage() {
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             placeholder={
-              type === "sugestao" ? "O que você gostaria de ver no sistema?" : "O que aconteceu? Onde?"
+              type === "bug"
+                ? "O que aconteceu? Onde?"
+                : type === "melhoria"
+                  ? "O que você gostaria de ver no sistema?"
+                  : type === "duvida"
+                    ? "Qual é a sua dúvida?"
+                    : "Conta pra gente o que você achou"
             }
           />
         </div>

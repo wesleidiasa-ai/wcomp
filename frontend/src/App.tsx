@@ -5,6 +5,7 @@ import { Layout } from "./components/Layout";
 import { LandingPage } from "./pages/LandingPage";
 import { LoginPage } from "./pages/LoginPage";
 import { RegisterCompanyPage } from "./pages/RegisterCompanyPage";
+import { AdminDashboardPage } from "./pages/AdminDashboardPage";
 import { AdminWaitlistPage } from "./pages/AdminWaitlistPage";
 import { AdminCreateCompanyPage } from "./pages/AdminCreateCompanyPage";
 import { AdminFeedbackPage } from "./pages/AdminFeedbackPage";
@@ -35,6 +36,7 @@ export default function App() {
           <Route path="/registrar" element={<RegisterCompanyPage />} />
           <Route path="/esqueci-senha" element={<ForgotPasswordPage />} />
           <Route path="/redefinir-senha" element={<ResetPasswordPage />} />
+          <Route path="/admin" element={<AdminDashboardPage />} />
           <Route path="/admin/waitlist" element={<AdminWaitlistPage />} />
           <Route path="/admin/criar-empresa" element={<AdminCreateCompanyPage />} />
           <Route path="/admin/feedback" element={<AdminFeedbackPage />} />

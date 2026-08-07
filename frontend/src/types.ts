@@ -244,13 +244,15 @@ export type AccessRequest = {
   id: string;
   companyName: string;
   contactName: string;
+  role: string | null;
+  city: string | null;
   email: string;
   phone: string | null;
   message: string | null;
   createdAt: string;
 };
 
-export type FeedbackType = "sugestao" | "problema";
+export type FeedbackType = "bug" | "melhoria" | "duvida" | "elogio";
 
 export type FeedbackEntry = {
   id: string;
@@ -270,7 +272,36 @@ export type AdminCompany = {
   active: boolean;
   maxUsers: number | null;
   userCount: number;
+  purchaseRequestCount: number;
   createdAt: string;
+};
+
+export type AdminDashboardSummary = {
+  kpis: { companies: number; activeCompanies: number; users: number; purchaseRequests: number };
+  secondary: { accessRequestCount: number; feedbackCount: number; trialCompanies: number };
+  growth: { month: string; label: string; count: number }[];
+  stats: {
+    pedidosHoje: number;
+    pedidosMes: number;
+    tempoMedioAprovacaoDias: number | null;
+    economiaGerada: number;
+  };
+  infra: { database: boolean; api: boolean; email: boolean };
+};
+
+export type AuditLogEntry = {
+  id: string;
+  action: string;
+  targetName: string;
+  detail: string | null;
+  createdAt: string;
+};
+
+export type AdminSearchResult = {
+  companies: { id: string; name: string }[];
+  users: { id: string; name: string; email: string; company: { name: string } }[];
+  purchaseRequests: { id: string; title: string; requestNumber: number | null; company: { name: string } }[];
+  suppliers: { id: string; name: string; company: { name: string } }[];
 };
 
 export type PendingNotifications = {

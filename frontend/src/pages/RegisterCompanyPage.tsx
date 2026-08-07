@@ -7,6 +7,8 @@ export function RegisterCompanyPage() {
   const [form, setForm] = useState({
     companyName: "",
     contactName: "",
+    role: "",
+    city: "",
     email: "",
     phone: "",
     message: "",
@@ -27,6 +29,8 @@ export function RegisterCompanyPage() {
     try {
       await api.post("/access-requests", {
         ...form,
+        role: form.role || undefined,
+        city: form.city || undefined,
         phone: form.phone || undefined,
         message: form.message || undefined,
       });
@@ -75,6 +79,14 @@ export function RegisterCompanyPage() {
           <div>
             <label className={labelClass}>Seu nome</label>
             <input required className={inputClass} value={form.contactName} onChange={update("contactName")} />
+          </div>
+          <div>
+            <label className={labelClass}>Seu cargo (opcional)</label>
+            <input className={inputClass} value={form.role} onChange={update("role")} />
+          </div>
+          <div>
+            <label className={labelClass}>Cidade (opcional)</label>
+            <input className={inputClass} value={form.city} onChange={update("city")} />
           </div>
           <div>
             <label className={labelClass}>Seu e-mail</label>

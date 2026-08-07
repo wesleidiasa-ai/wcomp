@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { AdminKeyGate } from "../components/AdminKeyGate";
+import { AdminNav } from "../components/AdminNav";
 import { api, ApiError } from "../lib/api";
 import { cardClass, inputClass } from "../components/ui";
 import type { AdminCompany } from "../types";
@@ -49,10 +49,12 @@ function CompanyRow({
         <div className="font-medium">{company.name}</div>
         <div className="text-xs text-neutral-400">{company.email ?? "—"}</div>
       </td>
+      <td className="py-2 pr-4 capitalize">{company.plan}</td>
       <td className="py-2 pr-4">
         {company.userCount}
         {company.maxUsers !== null && ` / ${company.maxUsers}`}
       </td>
+      <td className="py-2 pr-4">{company.purchaseRequestCount}</td>
       <td className="py-2 pr-4">
         <input
           type="number"
@@ -66,6 +68,16 @@ function CompanyRow({
         />
       </td>
       <td className="py-2 pr-4 whitespace-nowrap">{formatDate(company.createdAt)}</td>
+      <td className="py-2 pr-4">
+        <span
+          className={`inline-flex items-center gap-1.5 text-xs font-medium ${
+            company.active ? "text-emerald-700 dark:text-emerald-400" : "text-red-700 dark:text-red-400"
+          }`}
+        >
+          <span className={`h-2 w-2 rounded-full ${company.active ? "bg-emerald-500" : "bg-red-500"}`} aria-hidden="true" />
+          {company.active ? "Ativa" : "Inativa"}
+        </span>
+      </td>
       <td className="py-2 text-right">
         <button
           disabled={busy}
@@ -118,9 +130,12 @@ function CompaniesTable({ adminKey, onUnauthorized }: { adminKey: string; onUnau
             <thead>
               <tr className="border-b border-neutral-200 text-neutral-500 dark:border-neutral-800 dark:text-neutral-400">
                 <th className="pb-2 pr-4 font-medium">Empresa</th>
+                <th className="pb-2 pr-4 font-medium">Plano</th>
                 <th className="pb-2 pr-4 font-medium">Usuários</th>
+                <th className="pb-2 pr-4 font-medium">Pedidos</th>
                 <th className="pb-2 pr-4 font-medium">Limite</th>
                 <th className="pb-2 pr-4 font-medium">Criada em</th>
+                <th className="pb-2 pr-4 font-medium">Status</th>
                 <th className="pb-2 font-medium" />
               </tr>
             </thead>
@@ -146,18 +161,9 @@ export function AdminCompaniesPage() {
   return (
     <AdminKeyGate>
       {(adminKey, clearKey) => (
-        <div className="mx-auto max-w-4xl space-y-4 px-6 py-10">
-          <div className="flex items-center justify-between">
-            <h1 className="text-xl font-semibold">Empresas cadastradas</h1>
-            <div className="flex items-center gap-4 text-sm">
-              <Link to="/admin/waitlist" className="font-medium text-blue-700 hover:underline dark:text-blue-400">
-                Lista de espera →
-              </Link>
-              <button onClick={clearKey} className="text-neutral-500 hover:underline dark:text-neutral-400">
-                Sair
-              </button>
-            </div>
-          </div>
+        <div className="mx-auto max-w-5xl px-6 py-10">
+          <h1 className="mb-4 text-xl font-semibold">Empresas cadastradas</h1>
+          <AdminNav onLogout={clearKey} />
           <CompaniesTable adminKey={adminKey} onUnauthorized={clearKey} />
         </div>
       )}

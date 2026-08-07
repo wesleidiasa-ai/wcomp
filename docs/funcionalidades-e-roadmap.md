@@ -1,6 +1,6 @@
 # SupplyOR — Funcionalidades e Roadmap
 
-_Última atualização: 06/08/2026_
+_Última atualização: 07/08/2026_
 
 Este documento resume o que o SupplyOR já faz hoje em produção (supplyor.com.br) e o que está mapeado como próximos passos. É um retrato do sistema neste momento — conforme novas funcionalidades entrarem, vale manter este arquivo atualizado.
 
@@ -86,7 +86,7 @@ Solicitação → Aprovação → Cotação → Pedido enviado ao fornecedor
 
 ### 2.9 Feedback interno
 - Botão "💡 Feedback" no menu lateral, disponível a qualquer usuário logado
-- Envio de sugestão ou reporte de problema, direto pro painel do admin da plataforma (não pro admin do cliente)
+- Envio por categoria (🐞 Bug, 💡 Melhoria, ❓ Dúvida, 🎉 Elogio), direto pro painel do admin da plataforma (não pro admin do cliente)
 
 ### 2.10 Bot de WhatsApp (intake de pedidos)
 - Integração com WhatsApp Cloud API (Meta), por empresa (`whatsappPhoneNumberId` próprio)
@@ -95,11 +95,14 @@ Solicitação → Aprovação → Cotação → Pedido enviado ao fornecedor
 - Modo stub em desenvolvimento (loga no console em vez de enviar de verdade), sem precisar de conta da Meta pra testar
 
 ### 2.11 Painel do admin da plataforma (você, Weslei)
-Protegido por chave compartilhada (`x-admin-key`), fora do login normal das empresas clientes:
-- **Lista de espera**: pedidos de acesso de quem preenche o formulário público, sem criar empresa automaticamente
+Protegido por chave compartilhada (`x-admin-key`), fora do login normal das empresas clientes, em `/admin`:
+- **Dashboard**: KPIs (empresas, usuários, pedidos, empresas ativas), empresas em teste, gráfico de empresas cadastradas por mês, estatísticas da plataforma (pedidos hoje/mês, tempo médio de aprovação, economia gerada), status de infraestrutura (banco, API, e-mail), trilha de auditoria das ações administrativas e busca global (empresa, usuário, pedido, fornecedor)
+- **Lista de espera**: pedidos de acesso de quem preenche o formulário público (com cargo e cidade), sem criar empresa automaticamente — botão "Liberar acesso" já leva pro formulário de criar empresa com os dados pré-preenchidos
 - **Criar empresa**: cadastro manual de empresa + admin inicial (com envio de e-mail de boas-vindas)
-- **Gestão de empresas**: ativar/desativar, definir limite de usuários
-- **Sugestões e problemas**: feed do que os usuários reportaram, com link pra empresa/usuário de origem
+- **Gestão de empresas**: plano, quantidade de pedidos, ativar/desativar, definir limite de usuários
+- **Sugestões e problemas**: feed por categoria do que os usuários reportaram, com link pra empresa/usuário de origem
+
+O dashboard **não mostra receita, MRR nem funil de conversão** — de propósito, pra não simular número de negócio que não existe: o SupplyOR ainda não tem cobrança nem rastreamento de visitantes implementados (ver Limitações e Roadmap).
 
 ### 2.12 Site público
 - Landing page de alta conversão (`supplyor.com.br`), com CTA de "Solicitar acesso" (waitlist, não auto-cadastro)

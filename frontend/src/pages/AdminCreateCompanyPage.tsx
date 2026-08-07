@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
-import { Link } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { AdminKeyGate } from "../components/AdminKeyGate";
+import { AdminNav } from "../components/AdminNav";
 import { api, ApiError } from "../lib/api";
 import { buttonPrimaryClass, cardClass, inputClass, labelClass } from "../components/ui";
 
@@ -22,8 +23,16 @@ const EMPTY_FORM: CompanyFormState = {
   password: "",
 };
 
-function CreateCompanyForm({ adminKey, onUnauthorized }: { adminKey: string; onUnauthorized: () => void }) {
-  const [form, setForm] = useState<CompanyFormState>(EMPTY_FORM);
+function CreateCompanyForm({
+  adminKey,
+  onUnauthorized,
+  initialForm,
+}: {
+  adminKey: string;
+  onUnauthorized: () => void;
+  initialForm: CompanyFormState;
+}) {
+  const [form, setForm] = useState<CompanyFormState>(initialForm);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [created, setCreated] = useState<{ companyName: string; email: string; password: string } | null>(null);
@@ -120,22 +129,22 @@ function CreateCompanyForm({ adminKey, onUnauthorized }: { adminKey: string; onU
 }
 
 export function AdminCreateCompanyPage() {
+  const [searchParams] = useSearchParams();
+  const initialForm: CompanyFormState = {
+    ...EMPTY_FORM,
+    companyName: searchParams.get("companyName") ?? "",
+    adminName: searchParams.get("adminName") ?? "",
+    adminEmail: searchParams.get("adminEmail") ?? "",
+    adminPhone: searchParams.get("adminPhone") ?? "",
+  };
+
   return (
     <AdminKeyGate>
       {(adminKey, clearKey) => (
-        <div className="mx-auto max-w-sm space-y-4 px-6 py-10">
-          <div className="flex items-center justify-between">
-            <h1 className="text-xl font-semibold">Criar empresa</h1>
-            <div className="flex items-center gap-4 text-sm">
-              <Link to="/admin/waitlist" className="font-medium text-blue-700 hover:underline dark:text-blue-400">
-                Lista de espera →
-              </Link>
-              <button onClick={clearKey} className="text-neutral-500 hover:underline dark:text-neutral-400">
-                Sair
-              </button>
-            </div>
-          </div>
-          <CreateCompanyForm adminKey={adminKey} onUnauthorized={clearKey} />
+        <div className="mx-auto max-w-sm px-6 py-10">
+          <h1 className="mb-4 text-xl font-semibold">Criar empresa</h1>
+          <AdminNav onLogout={clearKey} />
+          <CreateCompanyForm adminKey={adminKey} onUnauthorized={clearKey} initialForm={initialForm} />
         </div>
       )}
     </AdminKeyGate>

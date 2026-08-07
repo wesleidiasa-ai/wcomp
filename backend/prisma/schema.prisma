@@ -284,12 +284,26 @@ model AccessRequest {
   id          String   @id @default(uuid()) @db.Uuid
   companyName String   @map("company_name")
   contactName String   @map("contact_name")
+  role        String? // cargo de quem preencheu o formulário
+  city        String?
   email       String
   phone       String?
   message     String?
   createdAt   DateTime @default(now()) @map("created_at")
 
   @@map("access_requests")
+}
+
+// Trilha de auditoria das ações do admin da plataforma (fora do escopo de empresa).
+// Não tem "quem fez" porque hoje só existe um admin de plataforma (chave compartilhada).
+model AuditLog {
+  id         String   @id @default(uuid()) @db.Uuid
+  action     String // empresa_criada, empresa_ativada, empresa_desativada, limite_usuarios_alterado
+  targetName String   @map("target_name")
+  detail     String?
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@map("audit_logs")
 }
 
 // Sugestão ou problema reportado por um usuário de dentro do sistema, vai direto pro admin da plataforma

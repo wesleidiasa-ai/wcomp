@@ -9,6 +9,8 @@ export const accessRequestRouter = Router();
 const accessRequestSchema = z.object({
   companyName: z.string().min(1),
   contactName: z.string().min(1),
+  role: z.string().optional(),
+  city: z.string().optional(),
   email: z.string().email(),
   phone: z.string().optional(),
   message: z.string().optional(),

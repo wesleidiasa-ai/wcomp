@@ -4,6 +4,7 @@ import { prisma } from "../lib/prisma";
 import { asyncHandler } from "../middleware/asyncHandler";
 import { requirePlatformAdminKey } from "../middleware/auth";
 import { ApiError } from "../middleware/errorHandler";
+import { logAudit } from "../lib/auditLog";
 
 export const adminCompanyRouter = Router();
 
@@ -23,7 +24,7 @@ adminCompanyRouter.get(
         active: true,
         maxUsers: true,
         createdAt: true,
-        _count: { select: { users: true } },
+        _count: { select: { users: true, purchaseRequests: true } },
       },
     });
 
@@ -37,6 +38,7 @@ adminCompanyRouter.get(
         active: c.active,
         maxUsers: c.maxUsers,
         userCount: c._count.users,
+        purchaseRequestCount: c._count.purchaseRequests,
         createdAt: c.createdAt,
       }))
     );
@@ -61,6 +63,17 @@ adminCompanyRouter.patch(
       data: body,
       select: { id: true, name: true, active: true, maxUsers: true },
     });
+
+    if (body.active !== undefined && body.active !== company.active) {
+      await logAudit(body.active ? "empresa_ativada" : "empresa_desativada", company.name);
+    }
+    if (body.maxUsers !== undefined && body.maxUsers !== company.maxUsers) {
+      await logAudit(
+        "limite_usuarios_alterado",
+        company.name,
+        `${company.maxUsers ?? "sem limite"} → ${body.maxUsers ?? "sem limite"}`
+      );
+    }
 
     res.json(updated);
   })

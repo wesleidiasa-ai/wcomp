@@ -8,6 +8,7 @@ import { requireAuth, requirePlatformAdminKey } from "../middleware/auth";
 import { ApiError } from "../middleware/errorHandler";
 import { signToken } from "../utils/jwt";
 import { sendPasswordResetEmail, sendWelcomeEmail } from "../services/emailTemplates.service";
+import { logAudit } from "../lib/auditLog";
 
 function hashToken(token: string) {
   return crypto.createHash("sha256").update(token).digest("hex");
@@ -66,6 +67,8 @@ authRouter.post(
       companyName: company.name,
       password: body.password,
     });
+
+    await logAudit("empresa_criada", company.name, `admin: ${admin.name} <${admin.email}>`);
 
     const token = signToken({
       userId: admin.id,
