@@ -277,7 +277,14 @@ export type AdminCompany = {
 };
 
 export type AdminDashboardSummary = {
-  kpis: { companies: number; activeCompanies: number; users: number; purchaseRequests: number };
+  kpis: {
+    companies: number;
+    activeCompanies: number;
+    trialCompanies: number;
+    payingCompanies: number;
+    users: number;
+    purchaseRequests: number;
+  };
   secondary: { accessRequestCount: number; feedbackCount: number; trialCompanies: number };
   growth: { month: string; label: string; count: number }[];
   stats: {
@@ -285,7 +292,9 @@ export type AdminDashboardSummary = {
     pedidosMes: number;
     tempoMedioAprovacaoDias: number | null;
     economiaGerada: number;
+    totalMovimentado: number;
   };
+  sectorRanking: { name: string; count: number }[];
   infra: { database: boolean; api: boolean; email: boolean };
 };
 

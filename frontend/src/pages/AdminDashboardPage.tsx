@@ -31,6 +31,17 @@ function KpiTile({ label, value }: { label: string; value: string | number }) {
   );
 }
 
+function HeroStat({ icon, label, value }: { icon: string; label: string; value: string | number }) {
+  return (
+    <div>
+      <p className="text-2xl font-bold text-white">
+        {icon} {value}
+      </p>
+      <p className="text-sm text-blue-100">{label}</p>
+    </div>
+  );
+}
+
 function SecondaryTile({ label, value, to }: { label: string; value: number; to: string }) {
   return (
     <Link to={to} className={`${cardClass} block transition-colors hover:border-blue-400 dark:hover:border-blue-600`}>
@@ -172,17 +183,26 @@ function DashboardContent({ adminKey, onUnauthorized }: { adminKey: string; onUn
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <KpiTile label="Empresas" value={summary.kpis.companies} />
-        <KpiTile label="Usuários" value={summary.kpis.users} />
-        <KpiTile label="Pedidos" value={summary.kpis.purchaseRequests} />
-        <KpiTile label="Empresas ativas" value={summary.kpis.activeCompanies} />
+      <div className="rounded-lg bg-gradient-to-br from-blue-700 to-blue-900 p-6 shadow-sm dark:from-blue-800 dark:to-neutral-950">
+        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-blue-200">SupplyOR em números</h2>
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-5">
+          <HeroStat icon="🏢" label="Empresas ativas" value={summary.kpis.activeCompanies} />
+          <HeroStat icon="👥" label="Usuários" value={summary.kpis.users} />
+          <HeroStat icon="📦" label="Pedidos processados" value={summary.kpis.purchaseRequests} />
+          <HeroStat icon="💰" label="Em compras gerenciadas" value={formatMoney(summary.stats.totalMovimentado)} />
+          <HeroStat icon="💵" label="Economia identificada" value={formatMoney(summary.stats.economiaGerada)} />
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-3 gap-4">
+        <KpiTile label="Empresas ativas" value={summary.kpis.activeCompanies} />
+        <KpiTile label="Empresas em teste" value={summary.kpis.trialCompanies} />
+        <KpiTile label="Empresas pagantes" value={summary.kpis.payingCompanies} />
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <SecondaryTile label="Solicitações de acesso" value={summary.secondary.accessRequestCount} to="/admin/waitlist" />
         <SecondaryTile label="Feedbacks" value={summary.secondary.feedbackCount} to="/admin/feedback" />
-        <SecondaryTile label="Empresas em teste" value={summary.secondary.trialCompanies} to="/admin/empresas" />
       </div>
 
       <div className={cardClass}>
@@ -190,6 +210,33 @@ function DashboardContent({ adminKey, onUnauthorized }: { adminKey: string; onUn
           Crescimento — empresas cadastradas (últimos 6 meses)
         </h2>
         <CountBarChart data={summary.growth} unitLabel="empresa(s)" />
+      </div>
+
+      <div className={cardClass}>
+        <h2 className="mb-3 text-sm font-semibold text-neutral-700 dark:text-neutral-300">
+          Ranking de setores mais ativos
+        </h2>
+        {summary.sectorRanking.length === 0 ? (
+          <p className="text-sm text-neutral-500 dark:text-neutral-400">Nenhum pedido com setor definido ainda.</p>
+        ) : (
+          <>
+            <ol className="space-y-2 text-sm">
+              {summary.sectorRanking.map((s, i) => (
+                <li key={s.name} className="flex items-center justify-between">
+                  <span>
+                    <span className="mr-2 text-neutral-400">{i + 1}.</span>
+                    {s.name}
+                  </span>
+                  <span className="font-medium">{s.count} pedido(s)</span>
+                </li>
+              ))}
+            </ol>
+            <p className="mt-3 text-xs text-neutral-400">
+              Agrupado pelo nome do setor cadastrado em cada empresa — nomes iguais em empresas diferentes
+              entram juntos; não é uma categoria padronizada entre clientes.
+            </p>
+          </>
+        )}
       </div>
 
       <div className={`${cardClass} border-neutral-200 bg-neutral-50 dark:border-neutral-800 dark:bg-neutral-900/50`}>
@@ -208,14 +255,13 @@ function DashboardContent({ adminKey, onUnauthorized }: { adminKey: string; onUn
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <KpiTile label="Pedidos hoje" value={summary.stats.pedidosHoje} />
         <KpiTile label="Pedidos no mês" value={summary.stats.pedidosMes} />
         <KpiTile
           label="Tempo médio de aprovação"
           value={summary.stats.tempoMedioAprovacaoDias === null ? "—" : `${summary.stats.tempoMedioAprovacaoDias.toFixed(1)}d`}
         />
-        <KpiTile label="Economia gerada" value={formatMoney(summary.stats.economiaGerada)} />
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">

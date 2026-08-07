@@ -96,7 +96,7 @@ Solicitação → Aprovação → Cotação → Pedido enviado ao fornecedor
 
 ### 2.11 Painel do admin da plataforma (você, Weslei)
 Protegido por chave compartilhada (`x-admin-key`), fora do login normal das empresas clientes, em `/admin`:
-- **Dashboard**: KPIs (empresas, usuários, pedidos, empresas ativas), empresas em teste, gráfico de empresas cadastradas por mês, estatísticas da plataforma (pedidos hoje/mês, tempo médio de aprovação, economia gerada), status de infraestrutura (banco, API, e-mail), trilha de auditoria das ações administrativas e busca global (empresa, usuário, pedido, fornecedor)
+- **Dashboard**: banner "SupplyOR em números" (empresas ativas, usuários, pedidos processados, valor total em compras gerenciadas, economia identificada), empresas ativas/em teste/pagantes, gráfico de empresas cadastradas por mês, ranking de setores mais ativos, estatísticas da plataforma (pedidos hoje/mês, tempo médio de aprovação), status de infraestrutura (banco, API, e-mail), trilha de auditoria das ações administrativas e busca global (empresa, usuário, pedido, fornecedor)
 - **Lista de espera**: pedidos de acesso de quem preenche o formulário público (com cargo e cidade), sem criar empresa automaticamente — botão "Liberar acesso" já leva pro formulário de criar empresa com os dados pré-preenchidos
 - **Criar empresa**: cadastro manual de empresa + admin inicial (com envio de e-mail de boas-vindas)
 - **Gestão de empresas**: plano, quantidade de pedidos, ativar/desativar, definir limite de usuários

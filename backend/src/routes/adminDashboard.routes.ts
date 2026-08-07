@@ -30,6 +30,7 @@ adminDashboardRouter.get(
       companies,
       activeCompanies,
       trialCompanies,
+      payingCompanies,
       users,
       purchaseRequests,
       pedidosHoje,
@@ -41,6 +42,7 @@ adminDashboardRouter.get(
       prisma.company.count(),
       prisma.company.count({ where: { active: true } }),
       prisma.company.count({ where: { plan: "trial" } }),
+      prisma.company.count({ where: { plan: { not: "trial" } } }),
       prisma.user.count(),
       prisma.purchaseRequest.count(),
       prisma.purchaseRequest.count({ where: { createdAt: { gte: today } } }),
@@ -53,18 +55,23 @@ adminDashboardRouter.get(
       ),
     ]);
 
-    // tempo médio de aprovação e economia gerada, em toda a plataforma
+    // tempo médio de aprovação, economia gerada e valor movimentado, em toda a plataforma
     const requestsForStats = await prisma.purchaseRequest.findMany({
       select: {
         createdAt: true,
+        status: true,
         estimatedTotal: true,
-        quotes: { where: { selected: true }, select: { totalPrice: true } },
+        department: { select: { name: true } },
+        quotes: { where: { selected: true }, select: { totalPrice: true, freightValue: true } },
         statusHistory: { where: { toStatus: "aprovado" }, select: { changedAt: true }, take: 1 },
       },
     });
 
     const approvalDurations: number[] = [];
     let economiaGerada = 0;
+    let totalMovimentado = 0;
+    const sectorCounts = new Map<string, number>();
+
     for (const r of requestsForStats) {
       const approvedAt = r.statusHistory[0]?.changedAt;
       if (approvedAt) approvalDurations.push(approvedAt.getTime() - r.createdAt.getTime());
@@ -73,11 +80,29 @@ adminDashboardRouter.get(
       if (quote && r.estimatedTotal) {
         economiaGerada += Math.max(0, Number(r.estimatedTotal) - Number(quote.totalPrice));
       }
+
+      if (r.status === "recebido") {
+        const total = quote
+          ? Number(quote.totalPrice) + Number(quote.freightValue ?? 0)
+          : Number(r.estimatedTotal ?? 0);
+        totalMovimentado += total;
+      }
+
+      const sectorName = r.department?.name ?? "Sem setor";
+      sectorCounts.set(sectorName, (sectorCounts.get(sectorName) ?? 0) + 1);
     }
     const tempoMedioAprovacaoDias =
       approvalDurations.length === 0
         ? null
         : approvalDurations.reduce((a, b) => a + b, 0) / approvalDurations.length / (1000 * 60 * 60 * 24);
+
+    // ranking de setores: agrupado pelo nome do setor (texto livre por empresa,
+    // não é uma categoria compartilhada — empresas diferentes podem usar nomes diferentes
+    // pra algo parecido, ou o mesmo nome pra coisas diferentes)
+    const sectorRanking = [...sectorCounts.entries()]
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
 
     // crescimento: empresas cadastradas por mês, últimos 6 meses
     const monthsBack = 6;
@@ -103,10 +128,11 @@ adminDashboardRouter.get(
     });
 
     res.json({
-      kpis: { companies, activeCompanies, users, purchaseRequests },
+      kpis: { companies, activeCompanies, trialCompanies, payingCompanies, users, purchaseRequests },
       secondary: { accessRequestCount, feedbackCount, trialCompanies },
       growth,
-      stats: { pedidosHoje, pedidosMes, tempoMedioAprovacaoDias, economiaGerada },
+      stats: { pedidosHoje, pedidosMes, tempoMedioAprovacaoDias, economiaGerada, totalMovimentado },
+      sectorRanking,
       infra: { database: dbCheck, api: true, email: emailConfigured },
     });
   })
