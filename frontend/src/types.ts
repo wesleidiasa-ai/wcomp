@@ -146,7 +146,7 @@ export type PurchaseRequestStats = {
   valorTotalAberto: number;
 };
 
-export type PurchaseRequestDetail = PurchaseRequestSummary & {
+export type PurchaseRequestDetail = Omit<PurchaseRequestSummary, "quotes"> & {
   justification: string | null;
   quoteDeadline: string | null;
   deliveryNotes: string | null;
