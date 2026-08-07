@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { api, ApiError } from "../lib/api";
 import type { Department, PurchaseRequestDetail, Urgency } from "../types";
 import { buttonAccentClass, buttonSecondaryClass, cardClass, inputClass, labelClass } from "../components/ui";
@@ -16,6 +16,9 @@ const EMPTY_ITEM: ItemForm = { itemName: "", quantity: "1", unit: "", estimatedU
 
 export function RequestCreatePage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const duplicateFrom = searchParams.get("duplicateFrom");
+
   const [departments, setDepartments] = useState<Department[]>([]);
   const [title, setTitle] = useState("");
   const [justification, setJustification] = useState("");
@@ -24,10 +27,34 @@ export function RequestCreatePage() {
   const [items, setItems] = useState<ItemForm[]>([{ ...EMPTY_ITEM }]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [duplicating, setDuplicating] = useState(Boolean(duplicateFrom));
 
   useEffect(() => {
     api.get<Department[]>("/departments").then(setDepartments).catch(() => {});
   }, []);
+
+  useEffect(() => {
+    if (!duplicateFrom) return;
+    api
+      .get<PurchaseRequestDetail>(`/purchase-requests/${duplicateFrom}`)
+      .then((original) => {
+        setTitle(`${original.title} (cópia)`);
+        setJustification(original.justification ?? "");
+        setUrgency(original.urgency);
+        setDepartmentId(original.department?.id ?? "");
+        setItems(
+          original.items.map((it) => ({
+            itemName: it.itemName,
+            quantity: String(it.quantity),
+            unit: it.unit ?? "",
+            estimatedUnitPrice: it.estimatedUnitPrice ?? "",
+            notes: it.notes ?? "",
+          }))
+        );
+      })
+      .catch(() => setError("Não foi possível carregar o pedido original pra duplicar"))
+      .finally(() => setDuplicating(false));
+  }, [duplicateFrom]);
 
   function updateItem(index: number, field: keyof ItemForm, value: string) {
     setItems((prev) => prev.map((it, i) => (i === index ? { ...it, [field]: value } : it)));
@@ -82,6 +109,7 @@ export function RequestCreatePage() {
   return (
     <div className="mx-auto max-w-2xl">
       <h1 className="mb-5 text-xl font-semibold">Novo pedido de compra</h1>
+      {duplicating && <p className="mb-4 text-sm text-neutral-500">Carregando dados do pedido original...</p>}
       <form onSubmit={handleSubmit} className={`${cardClass} space-y-5`}>
         <div>
           <label className={labelClass}>Título</label>

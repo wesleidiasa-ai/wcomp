@@ -32,6 +32,7 @@ Solicitação → Aprovação → Cotação → Pedido enviado ao fornecedor
 - Histórico de status completo (auditoria de quem mudou o quê e quando)
 - Exclusão de pedido (com restrições de status/permissão)
 - **Geração de PDF do pedido de compra**, no layout de tabela com bordas (paisagem, A4), pronto pra enviar ao fornecedor — inclui dados da empresa (com logo, se configurada), itens, cotação vencedora, condição de pagamento e observações
+- **Lista de pedidos**: indicadores no topo (abertos, aguardando aprovação, em cotação, urgentes, recebidos hoje, valor total aberto); busca instantânea (número, item, solicitante, fornecedor, observação); filtros por status, setor, solicitante, fornecedor, período e valor; prioridade com cor/ícone; valor em destaque acima de um limiar; progresso mini (stepper compacto) e ícone de categoria por setor (heurística por palavra-chave, não uma taxonomia real); alertas de "parado há X dias" e "fornecedor atrasado"; linha inteira clicável; ação rápida de duplicar pedido; exportação em CSV; checkbox "mostrar apenas meus pedidos"
 
 ### 2.2 Aprovação
 - Regras de aprovação configuráveis por setor e faixa de valor (`minValue`/`maxValue`), com múltiplos níveis (`stepOrder`)
@@ -127,6 +128,9 @@ O dashboard **não mostra receita, MRR nem funil de conversão** — de propósi
 - **Exportar histórico de preços e indicadores** em CSV/Excel, pra levar pra negociação ou pra planilha de gestão.
 - **Categoria de item e centro de custo** no cadastro de item, com filtro correspondente no histórico de preços e nos indicadores.
 - **Preço por item na cotação** (hoje é só o total do pedido): permitiria comparação de preço real item a item entre fornecedores, não só a estimativa.
+- **Comprador responsável (assignee)** por pedido: hoje não existe esse campo — só solicitante e quem registrou a cotação. Precisaria de um campo novo + fluxo de atribuição.
+- **Editar pedido depois de criado**: hoje só dá pra duplicar (criar um novo a partir de um existente); editar itens/título de um pedido já em andamento exige cuidado com aprovação/cotação já feitas em cima dos dados originais.
+- **Exportação completa da lista de pedidos** em Excel (.xlsx) e PDF — hoje só tem CSV (abre bem no Excel) e o PDF é só por pedido individual, não da lista inteira.
 
 ### Médio prazo
 - **Anexos em storage externo** (S3-compatible) pra não depender do disco efêmero do Railway.

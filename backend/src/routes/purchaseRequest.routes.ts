@@ -49,24 +49,112 @@ const detailInclude = {
   statusHistory: { orderBy: { changedAt: "asc" as const } },
 };
 
+const OPEN_STATUSES = [
+  "aguardando_aprovacao",
+  "aprovado",
+  "em_cotacao",
+  "pedido_enviado",
+  "aguardando_entrega",
+  "aguardando_retirada",
+];
+
 purchaseRequestRouter.get(
   "/",
   asyncHandler(async (req, res) => {
-    const { status, departmentId } = req.query as { status?: string; departmentId?: string };
+    const q = req.query as Record<string, string | undefined>;
 
-    const requests = await prisma.purchaseRequest.findMany({
-      where: {
-        companyId: req.user!.companyId,
-        ...(status ? { status } : {}),
-        ...(departmentId ? { departmentId } : {}),
-        // solicitante só enxerga os próprios pedidos; demais papéis veem tudo da empresa
-        ...(req.user!.role === "solicitante" ? { requesterId: req.user!.userId } : {}),
+    const where: Record<string, unknown> = {
+      companyId: req.user!.companyId,
+      // solicitante só enxerga os próprios pedidos; demais papéis veem tudo da empresa
+      ...(req.user!.role === "solicitante" ? { requesterId: req.user!.userId } : {}),
+    };
+
+    if (q.status) where.status = q.status;
+    if (q.departmentId) where.departmentId = q.departmentId;
+    if (q.urgency) where.urgency = q.urgency;
+    if (q.requesterId) where.requesterId = q.requesterId;
+    if (q.mine === "true") where.requesterId = req.user!.userId;
+
+    if (q.dateFrom || q.dateTo) {
+      where.createdAt = {
+        ...(q.dateFrom ? { gte: new Date(q.dateFrom) } : {}),
+        ...(q.dateTo ? { lte: new Date(`${q.dateTo}T23:59:59.999`) } : {}),
+      };
+    }
+
+    if (q.minValue || q.maxValue) {
+      where.estimatedTotal = {
+        ...(q.minValue ? { gte: Number(q.minValue) } : {}),
+        ...(q.maxValue ? { lte: Number(q.maxValue) } : {}),
+      };
+    }
+
+    if (q.q) {
+      const term = q.q.trim();
+      const orClauses: Record<string, unknown>[] = [
+        { title: { contains: term, mode: "insensitive" } },
+        { justification: { contains: term, mode: "insensitive" } },
+        { requester: { name: { contains: term, mode: "insensitive" } } },
+        { items: { some: { itemName: { contains: term, mode: "insensitive" } } } },
+        { quotes: { some: { supplierName: { contains: term, mode: "insensitive" } } } },
+      ];
+      const asNumber = Number(term);
+      if (!Number.isNaN(asNumber)) orClauses.push({ requestNumber: asNumber });
+      where.OR = orClauses;
+    }
+
+    let requests = await prisma.purchaseRequest.findMany({
+      where,
+      include: {
+        requester: { select: { id: true, name: true } },
+        department: true,
+        items: true,
+        quotes: {
+          where: { selected: true },
+          select: { supplierId: true, supplierName: true, totalPrice: true, deliveryDays: true, createdAt: true },
+        },
       },
-      include: { requester: { select: { id: true, name: true } }, department: true, items: true },
       orderBy: { createdAt: "desc" },
     });
 
+    if (q.supplierId) {
+      requests = requests.filter((r) => r.quotes.some((quote) => quote.supplierId === q.supplierId));
+    }
+
     res.json(requests);
+  })
+);
+
+purchaseRequestRouter.get(
+  "/stats",
+  asyncHandler(async (req, res) => {
+    const scope: Record<string, unknown> = {
+      companyId: req.user!.companyId,
+      ...(req.user!.role === "solicitante" ? { requesterId: req.user!.userId } : {}),
+    };
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const [abertos, aguardandoAprovacao, emCotacao, urgentes, recebidosHoje, openRequests] = await Promise.all([
+      prisma.purchaseRequest.count({ where: { ...scope, status: { in: OPEN_STATUSES } } }),
+      prisma.purchaseRequest.count({ where: { ...scope, status: "aguardando_aprovacao" } }),
+      prisma.purchaseRequest.count({ where: { ...scope, status: "em_cotacao" } }),
+      prisma.purchaseRequest.count({
+        where: { ...scope, status: { in: OPEN_STATUSES }, urgency: { in: ["alta", "urgente"] } },
+      }),
+      prisma.purchaseRequest.count({
+        where: { ...scope, status: "recebido", statusHistory: { some: { toStatus: "recebido", changedAt: { gte: today } } } },
+      }),
+      prisma.purchaseRequest.findMany({
+        where: { ...scope, status: { in: OPEN_STATUSES } },
+        select: { estimatedTotal: true },
+      }),
+    ]);
+
+    const valorTotalAberto = openRequests.reduce((sum, r) => sum + Number(r.estimatedTotal ?? 0), 0);
+
+    res.json({ abertos, aguardandoAprovacao, emCotacao, urgentes, recebidosHoje, valorTotalAberto });
   })
 );
 

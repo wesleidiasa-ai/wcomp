@@ -130,9 +130,20 @@ export type PurchaseRequestSummary = {
   status: RequestStatus;
   estimatedTotal: string | null;
   createdAt: string;
+  updatedAt: string;
   requester: { id: string; name: string };
   department: Department | null;
   items: PurchaseRequestItem[];
+  quotes: { supplierId: string | null; supplierName: string; totalPrice: string; deliveryDays: number | null; createdAt: string }[];
+};
+
+export type PurchaseRequestStats = {
+  abertos: number;
+  aguardandoAprovacao: number;
+  emCotacao: number;
+  urgentes: number;
+  recebidosHoje: number;
+  valorTotalAberto: number;
 };
 
 export type PurchaseRequestDetail = PurchaseRequestSummary & {
