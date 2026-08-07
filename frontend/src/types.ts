@@ -205,16 +205,39 @@ export type Insight = {
   text: string;
 };
 
-export type PriceHistoryYear = {
-  year: number;
-  avgPrice: number;
-  samples: number;
-  variationPct: number | null;
-};
+export type PriceStatus = "abaixo" | "medio" | "acima";
 
 export type PriceHistoryItem = {
   itemName: string;
-  years: PriceHistoryYear[];
+  avgPrice: number;
+  lastPrice: number;
+  minPrice: number;
+  maxPrice: number;
+  lastPurchaseDate: string;
+  lastSupplierName: string | null;
+  samples: number;
+  savingsPct: number | null;
+  priceStatus: PriceStatus | null;
+};
+
+export type PriceHistoryListResponse = {
+  items: PriceHistoryItem[];
+  years: number[];
+};
+
+export type PriceHistoryEvent = {
+  date: string;
+  price: number;
+  quantity: number;
+  unit: string | null;
+  supplierName: string | null;
+  departmentName: string | null;
+};
+
+export type PriceHistoryDetail = {
+  itemName: string;
+  events: PriceHistoryEvent[];
+  monthly: { month: string; avgPrice: number }[];
 };
 
 export type AccessRequest = {
