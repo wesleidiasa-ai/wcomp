@@ -189,9 +189,12 @@ export type DashboardSummary = {
   pedidosEsteMes: number;
   aguardandoAprovacao: number;
   emCotacao: number;
+  pedidosAtrasados: number;
   comprasRealizadas: number;
   comprasRealizadasCount: number;
   economiaObtida: number;
+  economiaObtidaPercent: number | null;
+  previousMonth: { pedidos: number; compras: number; economia: number };
 };
 
 export type MonthlyStat = {
@@ -202,10 +205,13 @@ export type MonthlyStat = {
   count: number;
 };
 
+export type MonthlyRange = "6m" | "12m" | "ytd" | "last_year";
+
 export type DashboardIndicators = {
-  gastoPorSetor: { name: string; total: number }[];
+  gastoPorSetor: { id: string | null; name: string; total: number }[];
   topSolicitantes: { name: string; count: number }[];
-  topFornecedores: { name: string; count: number; total: number }[];
+  topFornecedores: { supplierId: string | null; name: string; count: number; total: number; economia: number }[];
+  statusBreakdown: { status: RequestStatus; count: number }[];
   tempoMedioAprovacaoDias: number | null;
   tempoMedioCompraDias: number | null;
   economiaEmNegociacoes: number;
@@ -214,6 +220,15 @@ export type DashboardIndicators = {
 export type Insight = {
   icon: string;
   text: string;
+  link?: string;
+};
+
+export type AttentionItem = {
+  id: string;
+  requestNumber: number | null;
+  title: string;
+  severity: "alta" | "media";
+  reason: string;
 };
 
 export type PriceStatus = "abaixo" | "medio" | "acima";

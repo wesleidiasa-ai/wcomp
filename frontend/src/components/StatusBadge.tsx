@@ -1,5 +1,17 @@
 import type { RequestStatus } from "../types";
 
+export const STATUS_DOT_COLORS: Record<RequestStatus, string> = {
+  aguardando_aprovacao: "bg-amber-500",
+  aprovado: "bg-emerald-500",
+  reprovado: "bg-red-500",
+  em_cotacao: "bg-blue-500",
+  pedido_enviado: "bg-indigo-500",
+  aguardando_entrega: "bg-cyan-500",
+  aguardando_retirada: "bg-cyan-500",
+  recebido: "bg-teal-500",
+  cancelado: "bg-neutral-400",
+};
+
 const STYLES: Record<RequestStatus, string> = {
   aguardando_aprovacao:
     "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300",
@@ -13,7 +25,7 @@ const STYLES: Record<RequestStatus, string> = {
   cancelado: "bg-neutral-200 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300",
 };
 
-const LABELS: Record<RequestStatus, string> = {
+export const STATUS_LABELS: Record<RequestStatus, string> = {
   aguardando_aprovacao: "Aguardando aprovação",
   aprovado: "Aprovado",
   reprovado: "Reprovado",
@@ -28,7 +40,7 @@ const LABELS: Record<RequestStatus, string> = {
 export function StatusBadge({ status }: { status: RequestStatus }) {
   return (
     <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${STYLES[status]}`}>
-      {LABELS[status]}
+      {STATUS_LABELS[status]}
     </span>
   );
 }

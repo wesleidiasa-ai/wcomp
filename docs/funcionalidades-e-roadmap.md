@@ -63,10 +63,13 @@ Solicitação → Aprovação → Cotação → Pedido enviado ao fornecedor
 
 ### 2.6 Dashboard e indicadores
 - Dashboard adaptado por papel (solicitante vê só o que é dele; admin/comprador vê a empresa toda)
-- KPIs do mês: pedidos criados, aguardando aprovação, em cotação, compras realizadas (qtde + valor), economia obtida
-- Gráfico de compras por mês (últimos 6 meses)
-- Indicadores gerenciais: gasto por setor, top fornecedores, quem mais solicita, tempo médio de aprovação, tempo médio de compra, economia em negociações, pedidos atrasados
-- Seção de **Insights**: observações automáticas geradas a partir dos dados do período (ex: setor que mais gasta, fornecedor mais usado, % de economia)
+- KPIs do mês: pedidos criados, aguardando aprovação, em cotação, **pedidos atrasados**, compras realizadas (qtde + valor), economia obtida (com % sobre o valor estimado) — com comparação vs mês anterior (↑/↓ %)
+- **Resumo do período**: card com o total do mês em uma frase só, reforçando o ROI (economia gerada)
+- **Pedidos que precisam de atenção**: lista com pedido parado há dias, fornecedor atrasado ou prazo vencendo amanhã, cada um linkando direto pro pedido
+- Gráfico de compras por mês, com seletor de período (últimos 6/12 meses, este ano, ano anterior)
+- **Status dos pedidos**: contagem por status, com selo colorido
+- Indicadores gerenciais: gasto por setor, top fornecedores (com contagem, total e **economia por fornecedor**), quem mais solicita, tempo médio de aprovação, tempo médio de compra, economia em negociações
+- Seção de **Insights**: observações automáticas a partir dos dados do período (setor que mais gasta, fornecedor mais usado, % de economia, cotações paradas), **clicáveis** — levam direto pra lista de pedidos filtrada ou pro fornecedor
 - Centro de notificações (sino no header) com pendências do usuário
 
 ### 2.7 Administração da empresa (papel admin)
@@ -131,6 +134,7 @@ O dashboard **não mostra receita, MRR nem funil de conversão** — de propósi
 - **Comprador responsável (assignee)** por pedido: hoje não existe esse campo — só solicitante e quem registrou a cotação. Precisaria de um campo novo + fluxo de atribuição.
 - **Editar pedido depois de criado**: hoje só dá pra duplicar (criar um novo a partir de um existente); editar itens/título de um pedido já em andamento exige cuidado com aprovação/cotação já feitas em cima dos dados originais.
 - **Exportação completa da lista de pedidos** em Excel (.xlsx) e PDF — hoje só tem CSV (abre bem no Excel) e o PDF é só por pedido individual, não da lista inteira.
+- **Detalhamento de "Como calculamos sua economia?"**: um modal ou tela mostrando, pedido a pedido, o preço estimado vs a cotação vencedora que compôs a economia do período — hoje o dashboard mostra o total e o %, mas não abre o detalhamento item a item.
 
 ### Médio prazo
 - **Anexos em storage externo** (S3-compatible) pra não depender do disco efêmero do Railway.
