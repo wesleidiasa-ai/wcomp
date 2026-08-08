@@ -12,6 +12,37 @@ function startOfMonth() {
   return new Date(now.getFullYear(), now.getMonth(), 1);
 }
 
+const STALLABLE_STATUSES = ["aguardando_aprovacao", "em_cotacao"];
+const AWAITING_DELIVERY_STATUSES = ["pedido_enviado", "aguardando_entrega", "aguardando_retirada"];
+const STALL_DAYS_THRESHOLD = 3;
+
+async function countAtrasados(scope: Record<string, unknown>) {
+  const [stalled, awaitingDelivery] = await Promise.all([
+    prisma.purchaseRequest.count({
+      where: {
+        ...scope,
+        status: { in: STALLABLE_STATUSES },
+        updatedAt: { lte: new Date(Date.now() - STALL_DAYS_THRESHOLD * 24 * 60 * 60 * 1000) },
+      },
+    }),
+    prisma.purchaseRequest.findMany({
+      where: { ...scope, status: { in: AWAITING_DELIVERY_STATUSES } },
+      select: { quotes: { where: { selected: true }, select: { createdAt: true, deliveryDays: true } } },
+    }),
+  ]);
+
+  const now = Date.now();
+  const lateDeliveries = awaitingDelivery.filter((r) => {
+    const quote = r.quotes[0];
+    if (!quote?.deliveryDays) return false;
+    const expected = new Date(quote.createdAt);
+    expected.setDate(expected.getDate() + quote.deliveryDays);
+    return now > expected.getTime();
+  }).length;
+
+  return stalled + lateDeliveries;
+}
+
 dashboardRouter.get(
   "/summary",
   asyncHandler(async (req, res) => {
@@ -20,10 +51,11 @@ dashboardRouter.get(
     // solicitante só vê os próprios pedidos; os demais papéis veem a empresa toda
     const scope = req.user!.role === "solicitante" ? { companyId, requesterId: req.user!.userId } : { companyId };
 
-    const [pedidosEsteMes, aguardandoAprovacao, emCotacao, recebidosEsteMes] = await Promise.all([
+    const [pedidosEsteMes, aguardandoAprovacao, emCotacao, pedidosAtrasados, recebidosEsteMes] = await Promise.all([
       prisma.purchaseRequest.count({ where: { ...scope, createdAt: { gte: monthStart } } }),
       prisma.purchaseRequest.count({ where: { ...scope, status: "aguardando_aprovacao" } }),
       prisma.purchaseRequest.count({ where: { ...scope, status: "em_cotacao" } }),
+      countAtrasados(scope),
       prisma.purchaseRequest.findMany({
         where: { ...scope, status: "recebido", createdAt: { gte: monthStart } },
         select: {
@@ -50,6 +82,7 @@ dashboardRouter.get(
       pedidosEsteMes,
       aguardandoAprovacao,
       emCotacao,
+      pedidosAtrasados,
       comprasRealizadas,
       comprasRealizadasCount: recebidosEsteMes.length,
       economiaObtida,

@@ -189,6 +189,7 @@ export type DashboardSummary = {
   pedidosEsteMes: number;
   aguardandoAprovacao: number;
   emCotacao: number;
+  pedidosAtrasados: number;
   comprasRealizadas: number;
   comprasRealizadasCount: number;
   economiaObtida: number;

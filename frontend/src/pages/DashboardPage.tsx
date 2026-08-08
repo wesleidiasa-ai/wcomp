@@ -62,6 +62,12 @@ export function DashboardPage() {
       accent: "text-cyan-600 dark:text-cyan-400",
     },
     {
+      key: "pedidosAtrasados",
+      label: isSolicitante ? "Meus pedidos atrasados" : "Pedidos atrasados",
+      format: (v) => String(v),
+      accent: "text-red-600 dark:text-red-400",
+    },
+    {
       key: "economiaObtida",
       label: "Economia obtida",
       format: formatMoney,
@@ -81,7 +87,7 @@ export function DashboardPage() {
         </Link>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
         {KPI_CARDS.slice(0, 3).map((card) => (
           <div key={card.key} className={cardClass}>
             <p className="text-xs font-medium text-neutral-500 dark:text-neutral-400">{card.label}</p>
