@@ -97,13 +97,10 @@ export function DashboardPage() {
 
         <div className={cardClass}>
           <p className="text-xs font-medium text-neutral-500 dark:text-neutral-400">
-            {isSolicitante ? "Minhas compras recebidas" : "Compras realizadas"}
+            {isSolicitante ? "Minhas compras recebidas" : "Compras realizadas"} ({summary.comprasRealizadasCount})
           </p>
           <p className="mt-1 text-2xl font-bold text-neutral-900 dark:text-neutral-100">
             {formatMoney(summary.comprasRealizadas)}
-          </p>
-          <p className="text-xs font-medium text-neutral-500 dark:text-neutral-400">
-            {summary.comprasRealizadasCount} pedido(s)
           </p>
         </div>
 
