@@ -90,14 +90,17 @@ export function DashboardPage() {
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
         {KPI_CARDS.slice(0, 3).map((card) => (
           <div key={card.key} className={cardClass}>
-            <p className="text-xs font-medium text-neutral-500 dark:text-neutral-400">{card.label}</p>
+            <p className="truncate text-xs font-medium text-neutral-500 dark:text-neutral-400" title={card.label}>{card.label}</p>
             <p className={`mt-1 text-2xl font-bold ${card.accent}`}>{card.format(summary[card.key])}</p>
           </div>
         ))}
 
         <div className={cardClass}>
-          <p className="text-xs font-medium text-neutral-500 dark:text-neutral-400">
-            {isSolicitante ? "Minhas compras recebidas" : "Compras realizadas"} ({summary.comprasRealizadasCount})
+          <p
+            className="truncate text-xs font-medium text-neutral-500 dark:text-neutral-400"
+            title={isSolicitante ? "Minhas compras" : "Compras realizadas"}
+          >
+            {isSolicitante ? "Minhas compras" : "Compras realizadas"}
           </p>
           <p className="mt-1 text-2xl font-bold text-neutral-900 dark:text-neutral-100">
             {formatMoney(summary.comprasRealizadas)}
@@ -106,7 +109,7 @@ export function DashboardPage() {
 
         {KPI_CARDS.slice(3).map((card) => (
           <div key={card.key} className={cardClass}>
-            <p className="text-xs font-medium text-neutral-500 dark:text-neutral-400">{card.label}</p>
+            <p className="truncate text-xs font-medium text-neutral-500 dark:text-neutral-400" title={card.label}>{card.label}</p>
             <p className={`mt-1 text-2xl font-bold ${card.accent}`}>{card.format(summary[card.key])}</p>
           </div>
         ))}
