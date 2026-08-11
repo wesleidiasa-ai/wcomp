@@ -10,6 +10,11 @@ function formatMoney(value: number) {
   return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
+// versão sem centavos, só pra caber nos cards de KPI (largura apertada, 6 por linha)
+function formatMoneyCompact(value: number) {
+  return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
+}
+
 function formatDays(value: number | null) {
   if (value === null) return "—";
   return `${value.toFixed(1)} dia(s)`;
@@ -70,7 +75,7 @@ export function DashboardPage() {
     {
       key: "economiaObtida",
       label: "Economia obtida",
-      format: formatMoney,
+      format: formatMoneyCompact,
       accent: "text-emerald-600 dark:text-emerald-400",
     },
   ];
@@ -89,28 +94,41 @@ export function DashboardPage() {
 
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
         {KPI_CARDS.slice(0, 3).map((card) => (
-          <div key={card.key} className={cardClass}>
+          <div key={card.key} className={`${cardClass} min-w-0`}>
             <p className="truncate text-xs font-medium text-neutral-500 dark:text-neutral-400" title={card.label}>{card.label}</p>
-            <p className={`mt-1 text-2xl font-bold ${card.accent}`}>{card.format(summary[card.key])}</p>
+            <p
+              className={`mt-1 truncate text-xl font-bold ${card.accent}`}
+              title={card.format(summary[card.key])}
+            >
+              {card.format(summary[card.key])}
+            </p>
           </div>
         ))}
 
-        <div className={cardClass}>
+        <div className={`${cardClass} min-w-0`}>
           <p
             className="truncate text-xs font-medium text-neutral-500 dark:text-neutral-400"
             title={isSolicitante ? "Minhas compras" : "Compras realizadas"}
           >
             {isSolicitante ? "Minhas compras" : "Compras realizadas"}
           </p>
-          <p className="mt-1 text-2xl font-bold text-neutral-900 dark:text-neutral-100">
-            {formatMoney(summary.comprasRealizadas)}
+          <p
+            className="mt-1 truncate text-xl font-bold text-neutral-900 dark:text-neutral-100"
+            title={formatMoney(summary.comprasRealizadas)}
+          >
+            {formatMoneyCompact(summary.comprasRealizadas)}
           </p>
         </div>
 
         {KPI_CARDS.slice(3).map((card) => (
-          <div key={card.key} className={cardClass}>
+          <div key={card.key} className={`${cardClass} min-w-0`}>
             <p className="truncate text-xs font-medium text-neutral-500 dark:text-neutral-400" title={card.label}>{card.label}</p>
-            <p className={`mt-1 text-2xl font-bold ${card.accent}`}>{card.format(summary[card.key])}</p>
+            <p
+              className={`mt-1 truncate text-xl font-bold ${card.accent}`}
+              title={card.format(summary[card.key])}
+            >
+              {card.format(summary[card.key])}
+            </p>
           </div>
         ))}
       </div>
