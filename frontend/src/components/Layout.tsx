@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Link, NavLink, Outlet } from "react-router-dom";
+import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 import { Logo } from "./Logo";
 import { NotificationCenter } from "./NotificationCenter";
@@ -17,6 +17,34 @@ function NavIcon({ children }: { children: ReactNode }) {
     <span className="w-5 shrink-0 text-center" aria-hidden="true">
       {children}
     </span>
+  );
+}
+
+// Etapas do pedido, cada uma um atalho pra /pedidos com o status certo já filtrado —
+// reaproveita a mesma tela de Pedidos (filtros, busca, indicadores), só muda o filtro inicial.
+const REQUEST_STAGES = [
+  { label: "Solicitação de compras", icon: "📝", status: "aguardando_aprovacao" },
+  { label: "Aprovação", icon: "✅", status: "aprovado" },
+  { label: "Cotação", icon: "💬", status: "em_cotacao" },
+  { label: "Pedido", icon: "📦", status: "pedido_enviado,aguardando_entrega,aguardando_retirada,recebido" },
+];
+
+function StageLink({ label, icon, status }: { label: string; icon: string; status: string }) {
+  const location = useLocation();
+  const currentStatus = new URLSearchParams(location.search).get("status");
+  const isActive = location.pathname === "/pedidos" && currentStatus === status;
+
+  return (
+    <Link
+      to={`/pedidos?status=${encodeURIComponent(status)}`}
+      className={`flex items-center gap-2 rounded-md py-1.5 pl-9 pr-3 text-sm ${
+        isActive
+          ? "bg-blue-700 text-white dark:bg-blue-600"
+          : "text-neutral-500 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-800"
+      }`}
+    >
+      <span aria-hidden="true">{icon}</span> {label}
+    </Link>
   );
 }
 
@@ -56,6 +84,9 @@ export function Layout() {
             <NavLink to="/pedidos" className={linkClass} end>
               <NavIcon>📄</NavIcon> Pedidos
             </NavLink>
+            {REQUEST_STAGES.map((stage) => (
+              <StageLink key={stage.status} {...stage} />
+            ))}
             <NavLink to="/pedidos/novo" className={linkClass}>
               <NavIcon>➕</NavIcon> Novo pedido
             </NavLink>

@@ -69,7 +69,7 @@ purchaseRequestRouter.get(
       ...(req.user!.role === "solicitante" ? { requesterId: req.user!.userId } : {}),
     };
 
-    if (q.status) where.status = q.status;
+    if (q.status) where.status = q.status.includes(",") ? { in: q.status.split(",") } : q.status;
     if (q.departmentId) where.departmentId = q.departmentId;
     if (q.urgency) where.urgency = q.urgency;
     if (q.requesterId) where.requesterId = q.requesterId;

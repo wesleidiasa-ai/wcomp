@@ -92,6 +92,24 @@ export function RequestsListPage() {
 
   const showMineControls = user?.role !== "solicitante";
 
+  // re-sincroniza os filtros com a URL quando ela muda por fora (ex: link do menu
+  // lateral pra uma etapa diferente, enquanto já se está em /pedidos) — sem isso,
+  // o estado local só lia a URL na primeira montagem e ignorava navegações depois
+  useEffect(() => {
+    setSearch(searchParams.get("q") ?? "");
+    setStatus((searchParams.get("status") as RequestStatus | null) ?? "");
+    setDepartmentId(searchParams.get("departmentId") ?? "");
+    setRequesterId(searchParams.get("requesterId") ?? "");
+    setSupplierId(searchParams.get("supplierId") ?? "");
+    setUrgency((searchParams.get("urgency") as Urgency | null) ?? "");
+    setDateFrom(searchParams.get("dateFrom") ?? "");
+    setDateTo(searchParams.get("dateTo") ?? "");
+    setMinValue(searchParams.get("minValue") ?? "");
+    setMaxValue(searchParams.get("maxValue") ?? "");
+    setMine(searchParams.get("mine") === "true");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
   useEffect(() => {
     api.get<Department[]>("/departments").then(setDepartments).catch(() => {});
     api.get<Supplier[]>("/suppliers").then(setSuppliers).catch(() => {});
