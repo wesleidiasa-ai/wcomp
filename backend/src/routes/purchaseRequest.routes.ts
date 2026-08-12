@@ -32,7 +32,7 @@ const detailInclude = {
     orderBy: { createdAt: "asc" as const },
     include: {
       createdBy: { select: { id: true, name: true } },
-      supplier: { select: { id: true, name: true, rating: true } },
+      supplier: { select: { id: true, name: true } },
       attachments: {
         orderBy: { createdAt: "asc" as const },
         select: {

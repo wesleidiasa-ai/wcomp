@@ -33,15 +33,10 @@ export function SupplierDetailPage() {
       </Link>
 
       <div className={cardClass}>
-        <div className="flex items-start justify-between">
-          <div>
-            <h1 className="text-xl font-semibold">{supplier.name}</h1>
-            <p className="text-sm text-neutral-500 dark:text-neutral-400">
-              {[supplier.phone, supplier.email, supplier.cnpj].filter(Boolean).join(" · ") || "Sem contato cadastrado"}
-            </p>
-          </div>
-          {supplier.rating && <span className="text-lg text-amber-500">{"★".repeat(supplier.rating)}</span>}
-        </div>
+        <h1 className="text-xl font-semibold">{supplier.name}</h1>
+        <p className="text-sm text-neutral-500 dark:text-neutral-400">
+          {[supplier.phone, supplier.email, supplier.cnpj].filter(Boolean).join(" · ") || "Sem contato cadastrado"}
+        </p>
         {supplier.notes && <p className="mt-3 text-sm text-neutral-700 dark:text-neutral-300">{supplier.notes}</p>}
       </div>
 

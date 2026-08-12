@@ -111,7 +111,7 @@ export type Quote = {
   id: string;
   supplierId: string | null;
   supplierName: string;
-  supplier: { id: string; name: string; rating: number | null } | null;
+  supplier: { id: string; name: string } | null;
   totalPrice: string;
   freightValue: string | null;
   deliveryDays: number | null;
@@ -177,7 +177,6 @@ export type Supplier = {
   cnpj: string | null;
   phone: string | null;
   email: string | null;
-  rating: number | null;
   notes: string | null;
   createdAt: string;
 };

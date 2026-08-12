@@ -124,7 +124,6 @@ const supplierSchema = z.object({
   cnpj: z.string().optional(),
   phone: z.string().optional(),
   email: z.string().email().optional(),
-  rating: z.number().int().min(1).max(5).optional(),
   notes: z.string().optional(),
 });
 

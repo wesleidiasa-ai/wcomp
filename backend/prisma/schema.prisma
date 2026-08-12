@@ -49,7 +49,6 @@ model Supplier {
   cnpj      String?
   phone     String?
   email     String?
-  rating    Int? // avaliação manual do comprador, 1 a 5
   notes     String?
   createdAt DateTime @default(now()) @map("created_at")
 

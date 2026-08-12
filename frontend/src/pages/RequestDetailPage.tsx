@@ -427,9 +427,7 @@ export function RequestDetailPage() {
                               quote.selected ? "bg-emerald-50 dark:bg-emerald-900/20" : ""
                             }`}
                           >
-                            <td className="py-2 pr-3 font-medium">
-                              {quote.supplier?.rating ? `${quote.supplierName} (${"★".repeat(quote.supplier.rating)})` : quote.supplierName}
-                            </td>
+                            <td className="py-2 pr-3 font-medium">{quote.supplierName}</td>
                             <td className="py-2 pr-3">{formatMoney(quote.totalPrice)}</td>
                             <td className="py-2 pr-3">{quote.freightValue ? formatMoney(quote.freightValue) : "—"}</td>
                             <td className="py-2 pr-3 font-medium">

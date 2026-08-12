@@ -1,11 +1,11 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { api, ApiError } from "../lib/api";
 import { formatCnpj, formatPhone } from "../lib/format";
 import type { Supplier } from "../types";
 import { buttonPrimaryClass, cardClass, inputClass, labelClass } from "../components/ui";
 
-const EMPTY_FORM = { name: "", cnpj: "", phone: "", email: "", rating: "" };
+const EMPTY_FORM = { name: "", cnpj: "", phone: "", email: "" };
 
 type CnpjLookupResult = { name: string; phone: string; email: string };
 
@@ -15,12 +15,27 @@ export function SuppliersPage() {
   const [error, setError] = useState<string | null>(null);
   const [cnpjLookupLoading, setCnpjLookupLoading] = useState(false);
   const [cnpjLookupError, setCnpjLookupError] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
 
   function load() {
     api.get<Supplier[]>("/suppliers").then(setSuppliers).catch(() => {});
   }
 
   useEffect(load, []);
+
+  const filteredSuppliers = useMemo(() => {
+    if (!suppliers) return null;
+    const q = search.trim().toLowerCase();
+    if (!q) return suppliers;
+    const digits = search.replace(/\D/g, "");
+    return suppliers.filter((s) => {
+      if (s.name.toLowerCase().includes(q)) return true;
+      if (s.email?.toLowerCase().includes(q)) return true;
+      if (digits && s.cnpj?.replace(/\D/g, "").includes(digits)) return true;
+      if (digits && s.phone?.replace(/\D/g, "").includes(digits)) return true;
+      return false;
+    });
+  }, [suppliers, search]);
 
   async function handleCnpjLookup() {
     const digits = form.cnpj.replace(/\D/g, "");
@@ -54,7 +69,6 @@ export function SuppliersPage() {
         cnpj: form.cnpj || undefined,
         phone: form.phone || undefined,
         email: form.email || undefined,
-        rating: form.rating ? Number(form.rating) : undefined,
       });
       setForm(EMPTY_FORM);
       load();
@@ -119,17 +133,6 @@ export function SuppliersPage() {
           <label className={labelClass}>E-mail</label>
           <input type="email" className={inputClass} value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
         </div>
-        <div>
-          <label className={labelClass}>Avaliação (1 a 5)</label>
-          <select className={inputClass} value={form.rating} onChange={(e) => setForm({ ...form, rating: e.target.value })}>
-            <option value="">—</option>
-            {[1, 2, 3, 4, 5].map((n) => (
-              <option key={n} value={n}>
-                {n}
-              </option>
-            ))}
-          </select>
-        </div>
         <div className="col-span-2 flex justify-end">
           <button type="submit" className={buttonPrimaryClass}>
             Adicionar fornecedor
@@ -139,42 +142,50 @@ export function SuppliersPage() {
 
       {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
 
+      <input
+        className={inputClass}
+        placeholder="🔎 Buscar por nome, CNPJ, telefone ou e-mail..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
+
       <div className={`${cardClass} overflow-x-auto p-0`}>
         <table className="w-full text-left text-sm">
           <thead className="border-b border-neutral-200 text-neutral-500 dark:border-neutral-800 dark:text-neutral-400">
             <tr>
               <th className="px-4 py-3 font-medium">Nome</th>
+              <th className="px-4 py-3 font-medium">CNPJ</th>
               <th className="px-4 py-3 font-medium">Contato</th>
-              <th className="px-4 py-3 font-medium">Avaliação</th>
               <th className="px-4 py-3 font-medium" />
             </tr>
           </thead>
           <tbody>
-            {!suppliers ? (
+            {!filteredSuppliers ? (
               <tr>
                 <td className="px-4 py-3 text-neutral-500" colSpan={4}>
                   Carregando...
                 </td>
               </tr>
-            ) : suppliers.length === 0 ? (
+            ) : filteredSuppliers.length === 0 ? (
               <tr>
                 <td className="px-4 py-3 text-neutral-500 dark:text-neutral-400" colSpan={4}>
-                  Nenhum fornecedor cadastrado ainda — eles também são criados automaticamente ao registrar
-                  cotações.
+                  {search
+                    ? "Nenhum fornecedor encontrado para essa busca."
+                    : "Nenhum fornecedor cadastrado ainda — eles também são criados automaticamente ao registrar cotações."}
                 </td>
               </tr>
             ) : (
-              suppliers.map((s) => (
+              filteredSuppliers.map((s) => (
                 <tr key={s.id} className="border-b border-neutral-100 last:border-0 dark:border-neutral-800">
                   <td className="px-4 py-3">
                     <Link to={`/fornecedores/${s.id}`} className="font-medium hover:underline">
                       {s.name}
                     </Link>
                   </td>
+                  <td className="px-4 py-3 text-neutral-500 dark:text-neutral-400">{s.cnpj || "—"}</td>
                   <td className="px-4 py-3 text-neutral-500 dark:text-neutral-400">
                     {[s.phone, s.email].filter(Boolean).join(" · ") || "—"}
                   </td>
-                  <td className="px-4 py-3">{s.rating ? "★".repeat(s.rating) : "—"}</td>
                   <td className="px-4 py-3 text-right">
                     <button className="text-red-600 dark:text-red-400" onClick={() => handleDelete(s.id)}>
                       Remover
