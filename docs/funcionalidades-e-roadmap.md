@@ -53,6 +53,7 @@ Solicitação → Aprovação → Cotação → Pedido enviado ao fornecedor
 ### 2.4 Fornecedores
 - Catálogo de fornecedores por empresa (nome, CNPJ, telefone, e-mail, avaliação 1–5, observações)
 - Máscara de digitação para CNPJ e telefone
+- **Busca automática de dados pelo CNPJ**: botão "Buscar" ao lado do campo CNPJ consulta a Receita Federal (via BrasilAPI) e preenche nome/telefone automaticamente, evitando redigitação
 - Página de detalhe do fornecedor com estatísticas: total de cotações, cotações vencidas, prazo médio de entrega, preço médio, produtos fornecidos
 
 ### 2.5 Histórico de preços

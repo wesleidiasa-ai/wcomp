@@ -21,6 +21,45 @@ supplierRouter.get(
 );
 
 supplierRouter.get(
+  "/cnpj/:cnpj",
+  asyncHandler(async (req, res) => {
+    const digits = req.params.cnpj.replace(/\D/g, "");
+    if (digits.length !== 14) throw new ApiError(400, "CNPJ inválido");
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+    let response: Response;
+    try {
+      response = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${digits}`, {
+        signal: controller.signal,
+        headers: { "User-Agent": "SupplyOR/1.0", Accept: "application/json" },
+      });
+    } catch {
+      throw new ApiError(502, "Não foi possível consultar a Receita Federal no momento");
+    } finally {
+      clearTimeout(timeout);
+    }
+
+    if (response.status === 404) throw new ApiError(404, "CNPJ não encontrado na Receita Federal");
+    if (response.status === 400) throw new ApiError(400, "CNPJ inválido");
+    if (!response.ok) throw new ApiError(502, "Não foi possível consultar a Receita Federal no momento");
+
+    const data = (await response.json()) as {
+      razao_social?: string;
+      nome_fantasia?: string;
+      ddd_telefone_1?: string;
+      email?: string;
+    };
+
+    res.json({
+      name: data.nome_fantasia?.trim() || data.razao_social?.trim() || "",
+      phone: (data.ddd_telefone_1 ?? "").replace(/\D/g, ""),
+      email: data.email?.trim() || "",
+    });
+  })
+);
+
+supplierRouter.get(
   "/:id",
   asyncHandler(async (req, res) => {
     const supplier = await prisma.supplier.findFirst({

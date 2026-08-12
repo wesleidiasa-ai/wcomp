@@ -7,16 +7,43 @@ import { buttonPrimaryClass, cardClass, inputClass, labelClass } from "../compon
 
 const EMPTY_FORM = { name: "", cnpj: "", phone: "", email: "", rating: "" };
 
+type CnpjLookupResult = { name: string; phone: string; email: string };
+
 export function SuppliersPage() {
   const [suppliers, setSuppliers] = useState<Supplier[] | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [error, setError] = useState<string | null>(null);
+  const [cnpjLookupLoading, setCnpjLookupLoading] = useState(false);
+  const [cnpjLookupError, setCnpjLookupError] = useState<string | null>(null);
 
   function load() {
     api.get<Supplier[]>("/suppliers").then(setSuppliers).catch(() => {});
   }
 
   useEffect(load, []);
+
+  async function handleCnpjLookup() {
+    const digits = form.cnpj.replace(/\D/g, "");
+    if (digits.length !== 14) {
+      setCnpjLookupError("Informe um CNPJ completo (14 dígitos) para buscar");
+      return;
+    }
+    setCnpjLookupError(null);
+    setCnpjLookupLoading(true);
+    try {
+      const result = await api.get<CnpjLookupResult>(`/suppliers/cnpj/${digits}`);
+      setForm((f) => ({
+        ...f,
+        name: result.name || f.name,
+        phone: result.phone ? formatPhone(result.phone) : f.phone,
+        email: result.email || f.email,
+      }));
+    } catch (err) {
+      setCnpjLookupError(err instanceof ApiError ? err.message : "Não foi possível consultar o CNPJ");
+    } finally {
+      setCnpjLookupLoading(false);
+    }
+  }
 
   async function handleCreate(e: FormEvent) {
     e.preventDefault();
@@ -57,12 +84,27 @@ export function SuppliersPage() {
         </div>
         <div>
           <label className={labelClass}>CNPJ</label>
-          <input
-            className={inputClass}
-            placeholder="00.000.000/0001-00"
-            value={form.cnpj}
-            onChange={(e) => setForm({ ...form, cnpj: formatCnpj(e.target.value) })}
-          />
+          <div className="flex gap-2">
+            <input
+              className={inputClass}
+              placeholder="00.000.000/0001-00"
+              value={form.cnpj}
+              onChange={(e) => {
+                setForm({ ...form, cnpj: formatCnpj(e.target.value) });
+                setCnpjLookupError(null);
+              }}
+            />
+            <button
+              type="button"
+              onClick={handleCnpjLookup}
+              disabled={cnpjLookupLoading}
+              title="Buscar dados na Receita Federal"
+              className="shrink-0 rounded-md border border-neutral-300 px-3 text-sm font-medium text-neutral-600 hover:bg-neutral-100 disabled:opacity-50 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800"
+            >
+              {cnpjLookupLoading ? "Buscando..." : "🔎 Buscar"}
+            </button>
+          </div>
+          {cnpjLookupError && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{cnpjLookupError}</p>}
         </div>
         <div>
           <label className={labelClass}>Telefone</label>
