@@ -51,10 +51,10 @@ Solicitação → Aprovação → Cotação → Pedido enviado ao fornecedor
 - Anexos por cotação (print de orçamento, PDF de proposta) — upload, download e exclusão
 
 ### 2.4 Fornecedores
-- Catálogo de fornecedores por empresa (nome, CNPJ, telefone, e-mail, observações)
+- Catálogo de fornecedores por empresa (nome, CNPJ, telefone, e-mail, endereço completo, observações)
 - Máscara de digitação para CNPJ e telefone
-- **Busca automática de dados pelo CNPJ**: botão "Buscar" ao lado do campo CNPJ consulta a Receita Federal (via BrasilAPI) e preenche nome/telefone automaticamente, evitando redigitação
-- **Busca/filtro na lista de fornecedores**: campo único filtra por nome, CNPJ, telefone ou e-mail
+- **Busca automática de dados pelo CNPJ**: botão "Buscar" ao lado do campo CNPJ consulta a Receita Federal (via BrasilAPI) e preenche nome/telefone/endereço completo automaticamente, evitando redigitação
+- **Lista suspensa com busca**: em vez de uma tabela sempre visível, os fornecedores cadastrados ficam num campo de busca — abre uma lista suspensa (rolável, com limite de altura) ao focar, filtrando por nome, CNPJ, telefone ou e-mail conforme digita, pra não virar uma lista extensa conforme a base cresce
 - Página de detalhe do fornecedor com estatísticas: total de cotações, cotações vencidas, prazo médio de entrega, preço médio, produtos fornecidos
 
 ### 2.5 Histórico de preços

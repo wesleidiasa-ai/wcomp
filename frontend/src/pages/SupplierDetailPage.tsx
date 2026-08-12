@@ -10,6 +10,17 @@ function formatMoney(value: string | number | null) {
   return Number(value).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
+function formatAddress(s: SupplierDetail): string | null {
+  const line1 = [s.addressStreet, s.addressNumber].filter(Boolean).join(", ");
+  const line2 = s.addressComplement || null;
+  const line3 = [s.addressNeighborhood, [s.addressCity, s.addressState].filter(Boolean).join("/")]
+    .filter(Boolean)
+    .join(" - ");
+  const cep = s.addressZipCode ? `CEP ${s.addressZipCode}` : null;
+  const parts = [line1, line2, line3, cep].filter(Boolean);
+  return parts.length > 0 ? parts.join(" · ") : null;
+}
+
 export function SupplierDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [supplier, setSupplier] = useState<SupplierDetail | null>(null);
@@ -37,6 +48,9 @@ export function SupplierDetailPage() {
         <p className="text-sm text-neutral-500 dark:text-neutral-400">
           {[supplier.phone, supplier.email, supplier.cnpj].filter(Boolean).join(" · ") || "Sem contato cadastrado"}
         </p>
+        {formatAddress(supplier) && (
+          <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">{formatAddress(supplier)}</p>
+        )}
         {supplier.notes && <p className="mt-3 text-sm text-neutral-700 dark:text-neutral-300">{supplier.notes}</p>}
       </div>
 

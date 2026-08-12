@@ -177,6 +177,13 @@ export type Supplier = {
   cnpj: string | null;
   phone: string | null;
   email: string | null;
+  addressStreet: string | null;
+  addressNumber: string | null;
+  addressComplement: string | null;
+  addressNeighborhood: string | null;
+  addressCity: string | null;
+  addressState: string | null;
+  addressZipCode: string | null;
   notes: string | null;
   createdAt: string;
 };

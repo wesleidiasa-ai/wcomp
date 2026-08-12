@@ -49,12 +49,26 @@ supplierRouter.get(
       nome_fantasia?: string;
       ddd_telefone_1?: string;
       email?: string;
+      logradouro?: string;
+      numero?: string;
+      complemento?: string;
+      bairro?: string;
+      municipio?: string;
+      uf?: string;
+      cep?: string;
     };
 
     res.json({
       name: data.nome_fantasia?.trim() || data.razao_social?.trim() || "",
       phone: (data.ddd_telefone_1 ?? "").replace(/\D/g, ""),
       email: data.email?.trim() || "",
+      addressStreet: data.logradouro?.trim() || "",
+      addressNumber: data.numero?.trim() || "",
+      addressComplement: data.complemento?.trim() || "",
+      addressNeighborhood: data.bairro?.trim() || "",
+      addressCity: data.municipio?.trim() || "",
+      addressState: data.uf?.trim() || "",
+      addressZipCode: (data.cep ?? "").replace(/\D/g, ""),
     });
   })
 );
@@ -124,6 +138,13 @@ const supplierSchema = z.object({
   cnpj: z.string().optional(),
   phone: z.string().optional(),
   email: z.string().email().optional(),
+  addressStreet: z.string().optional(),
+  addressNumber: z.string().optional(),
+  addressComplement: z.string().optional(),
+  addressNeighborhood: z.string().optional(),
+  addressCity: z.string().optional(),
+  addressState: z.string().optional(),
+  addressZipCode: z.string().optional(),
   notes: z.string().optional(),
 });
 
