@@ -158,6 +158,7 @@ export type StageStatItem = {
   label: string;
   value: number;
   isMoney?: boolean;
+  display?: string;
 };
 
 export type PurchaseRequestDetail = Omit<PurchaseRequestSummary, "quotes"> & {

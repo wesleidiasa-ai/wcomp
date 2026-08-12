@@ -204,10 +204,10 @@ purchaseRequestRouter.get(
     const scope = scopeFor(req);
     const stage = String(req.query.stage ?? "solicitacoes");
 
-    type StatItem = { label: string; value: number; isMoney?: boolean };
+    type StatItem = { label: string; value: number; isMoney?: boolean; display?: string };
 
     if (stage === "aprovacoes") {
-      const [pendentes, urgentes, aprovadasHoje] = await Promise.all([
+      const [pendentes, urgentes, aprovadasHoje, oldest] = await Promise.all([
         prisma.purchaseRequest.count({ where: { ...scope, status: "aguardando_aprovacao" } }),
         prisma.purchaseRequest.count({
           where: { ...scope, status: "aguardando_aprovacao", urgency: { in: ["alta", "urgente"] } },
@@ -215,11 +215,22 @@ purchaseRequestRouter.get(
         prisma.purchaseRequest.count({
           where: { ...scope, statusHistory: { some: { toStatus: "aprovado", changedAt: { gte: startOfDay() } } } },
         }),
+        prisma.purchaseRequest.findFirst({
+          where: { ...scope, status: "aguardando_aprovacao" },
+          orderBy: { createdAt: "asc" },
+          select: { createdAt: true },
+        }),
       ]);
+      let maisAntigaDisplay = "—";
+      if (oldest) {
+        const days = Math.floor((Date.now() - oldest.createdAt.getTime()) / (24 * 60 * 60 * 1000));
+        maisAntigaDisplay = days <= 0 ? "hoje" : days === 1 ? "há 1 dia" : `há ${days} dias`;
+      }
       const items: StatItem[] = [
         { label: "Pendentes", value: pendentes },
         { label: "Urgentes", value: urgentes },
         { label: "Aprovadas hoje", value: aprovadasHoje },
+        { label: "Mais antiga", value: oldest ? Math.floor((Date.now() - oldest.createdAt.getTime()) / (24 * 60 * 60 * 1000)) : 0, display: maisAntigaDisplay },
       ];
       res.json(items);
       return;

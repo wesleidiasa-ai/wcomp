@@ -12,7 +12,7 @@ function StatChip({ item }: { item: StageStatItem }) {
   return (
     <div className={cardClass}>
       <p className="text-xs font-medium uppercase tracking-wide text-neutral-500 dark:text-neutral-400">{item.label}</p>
-      <p className="mt-1 text-xl font-bold">{item.isMoney ? formatMoney(item.value) : item.value}</p>
+      <p className="mt-1 text-xl font-bold">{item.display ?? (item.isMoney ? formatMoney(item.value) : item.value)}</p>
     </div>
   );
 }
@@ -65,13 +65,24 @@ export function WorkQueuePage({ stage, status, icon, title, description, emptyMe
       .catch(() => {});
   }, [stage]);
 
+  const isAprovacoes = stage === "aprovacoes";
+  const pendentes = isAprovacoes ? stats?.find((s) => s.label === "Pendentes")?.value ?? null : null;
+  const headerText =
+    pendentes === null
+      ? description
+      : pendentes === 0
+        ? "Nenhuma solicitação aguardando sua aprovação no momento."
+        : pendentes === 1
+          ? "1 solicitação aguardando sua aprovação."
+          : `${pendentes} solicitações aguardando sua aprovação.`;
+
   return (
     <div>
       <div className="mb-5">
         <h1 className="text-xl font-semibold">
           {icon} {title}
         </h1>
-        <p className="text-sm text-neutral-500 dark:text-neutral-400">{description}</p>
+        <p className="text-sm text-neutral-500 dark:text-neutral-400">{headerText}</p>
       </div>
 
       {stats && (
@@ -94,7 +105,7 @@ export function WorkQueuePage({ stage, status, icon, title, description, emptyMe
       {!requests ? (
         <p className="text-sm text-neutral-500">Carregando...</p>
       ) : (
-        <RequestsTable requests={requests} emptyMessage={emptyMessage} />
+        <RequestsTable requests={requests} emptyMessage={emptyMessage} showAnalyzeAction={isAprovacoes} />
       )}
     </div>
   );

@@ -100,13 +100,13 @@ export function Layout() {
             <NavLink to="/recebimentos" className={linkClass}>
               <NavIcon>🚚</NavIcon> Recebimentos
             </NavLink>
+
+            <SectionHeader>Gestão</SectionHeader>
             <NavLink to="/pedidos" className={linkClass} end>
               <NavIcon>🗃️</NavIcon> Todos os pedidos
             </NavLink>
-
             {(user.role === "admin" || user.role === "comprador") && (
               <>
-                <SectionHeader>Gestão</SectionHeader>
                 <NavLink to="/fornecedores" className={linkClass}>
                   <NavIcon>🏢</NavIcon> Fornecedores
                 </NavLink>

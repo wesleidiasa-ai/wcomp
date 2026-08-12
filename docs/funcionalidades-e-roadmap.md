@@ -152,3 +152,4 @@ O dashboard **não mostra receita, MRR nem funil de conversão** — de propósi
 
 - **Página de item "estilo Mercado Livre"** no histórico de preços — redundante com a tabela + modal atuais, que já resolvem o objetivo de escanear rápido.
 - **Filtros de categoria/centro de custo** no histórico — dependem de campos que ainda não existem no cadastro de item (ver seção de curto prazo).
+- **"Solicitar alteração" como um terceiro estado de decisão na aprovação** (além de Aprovar/Reprovar) — hoje "Reprovar com comentário" já cobre a necessidade prática de pedir ajuste ao solicitante sem exigir um novo estado/fluxo no schema.
