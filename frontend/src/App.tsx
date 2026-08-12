@@ -47,19 +47,6 @@ export default function App() {
             <Route element={<Layout />}>
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route
-                path="/solicitacoes"
-                element={
-                  <WorkQueuePage
-                    stage="solicitacoes"
-                    status="aguardando_aprovacao,aprovado,reprovado,em_cotacao,pedido_enviado,aguardando_entrega,aguardando_retirada,recebido,cancelado"
-                    icon="📋"
-                    title="Solicitações"
-                    description="Tudo que foi solicitado pelos usuários."
-                    emptyMessage="Nenhuma solicitação ainda."
-                  />
-                }
-              />
-              <Route
                 path="/aprovacoes"
                 element={
                   <WorkQueuePage

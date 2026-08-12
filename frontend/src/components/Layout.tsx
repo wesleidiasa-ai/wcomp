@@ -83,8 +83,8 @@ export function Layout() {
             </NavLink>
 
             <SectionHeader>Processo de compras</SectionHeader>
-            <NavLink to="/solicitacoes" className={linkClass}>
-              <NavIcon>📋</NavIcon> Solicitações
+            <NavLink to="/pedidos-enviados" className={linkClass}>
+              <NavIcon>📦</NavIcon> Pedidos
             </NavLink>
             <NavLink to="/aprovacoes" className={linkClass}>
               <NavIcon>✅</NavIcon> Aprovações
@@ -93,9 +93,6 @@ export function Layout() {
             <NavLink to="/cotacoes" className={linkClass}>
               <NavIcon>💬</NavIcon> Cotações
               <CountBadge count={counts?.cotacoes ?? 0} />
-            </NavLink>
-            <NavLink to="/pedidos-enviados" className={linkClass}>
-              <NavIcon>📦</NavIcon> Pedidos
             </NavLink>
             <NavLink to="/recebimentos" className={linkClass}>
               <NavIcon>🚚</NavIcon> Recebimentos

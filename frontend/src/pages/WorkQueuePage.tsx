@@ -26,7 +26,7 @@ export type WorkQueuePageProps = {
   emptyMessage: string;
 };
 
-/** Página de fila de trabalho por etapa (Solicitações/Aprovações/Cotações/Pedidos/Recebimentos) —
+/** Página de fila de trabalho por etapa (Pedidos/Aprovações/Cotações/Recebimentos) —
  * reaproveita a tabela de pedidos, só troca o filtro de status e os indicadores no topo. */
 export function WorkQueuePage({ stage, status, icon, title, description, emptyMessage }: WorkQueuePageProps) {
   const [requests, setRequests] = useState<PurchaseRequestSummary[] | null>(null);

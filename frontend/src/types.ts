@@ -147,7 +147,6 @@ export type PurchaseRequestStats = {
 };
 
 export type StageCounts = {
-  solicitacoes: number;
   aprovacoes: number;
   cotacoes: number;
   pedidos: number;

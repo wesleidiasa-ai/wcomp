@@ -74,11 +74,6 @@ function startOfDay() {
   return d;
 }
 
-function startOfMonth() {
-  const now = new Date();
-  return new Date(now.getFullYear(), now.getMonth(), 1);
-}
-
 function isLate(quote: { createdAt: Date; deliveryDays: number | null } | undefined) {
   if (!quote?.deliveryDays) return false;
   const expected = new Date(quote.createdAt);
@@ -186,15 +181,14 @@ purchaseRequestRouter.get(
   asyncHandler(async (req, res) => {
     const scope = scopeFor(req);
 
-    const [solicitacoes, aprovacoes, cotacoes, pedidos, recebimentos] = await Promise.all([
-      prisma.purchaseRequest.count({ where: scope }),
+    const [aprovacoes, cotacoes, pedidos, recebimentos] = await Promise.all([
       prisma.purchaseRequest.count({ where: { ...scope, status: "aguardando_aprovacao" } }),
       prisma.purchaseRequest.count({ where: { ...scope, status: "em_cotacao" } }),
       prisma.purchaseRequest.count({ where: { ...scope, status: "pedido_enviado" } }),
       prisma.purchaseRequest.count({ where: { ...scope, status: { in: ["aguardando_entrega", "aguardando_retirada"] } } }),
     ]);
 
-    res.json({ solicitacoes, aprovacoes, cotacoes, pedidos, recebimentos });
+    res.json({ aprovacoes, cotacoes, pedidos, recebimentos });
   })
 );
 
@@ -202,7 +196,7 @@ purchaseRequestRouter.get(
   "/stage-summary",
   asyncHandler(async (req, res) => {
     const scope = scopeFor(req);
-    const stage = String(req.query.stage ?? "solicitacoes");
+    const stage = String(req.query.stage ?? "");
 
     type StatItem = { label: string; value: number; isMoney?: boolean; display?: string };
 
@@ -298,18 +292,7 @@ purchaseRequestRouter.get(
       return;
     }
 
-    // solicitações: visão ampla, sem filtro de status
-    const [total, esteMes, emAndamento] = await Promise.all([
-      prisma.purchaseRequest.count({ where: scope }),
-      prisma.purchaseRequest.count({ where: { ...scope, createdAt: { gte: startOfMonth() } } }),
-      prisma.purchaseRequest.count({ where: { ...scope, status: { notIn: ["recebido", "reprovado", "cancelado"] } } }),
-    ]);
-    const items: StatItem[] = [
-      { label: "Total", value: total },
-      { label: "Este mês", value: esteMes },
-      { label: "Em andamento", value: emAndamento },
-    ];
-    res.json(items);
+    res.json([]);
   })
 );
 
