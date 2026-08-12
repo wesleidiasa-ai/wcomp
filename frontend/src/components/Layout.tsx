@@ -1,6 +1,8 @@
-import type { ReactNode } from "react";
-import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
+import { useEffect, useState, type ReactNode } from "react";
+import { Link, NavLink, Outlet } from "react-router-dom";
 import { useAuth } from "../lib/auth";
+import { api } from "../lib/api";
+import type { StageCounts } from "../types";
 import { Logo } from "./Logo";
 import { NotificationCenter } from "./NotificationCenter";
 import { buttonAccentClass } from "./ui";
@@ -20,36 +22,31 @@ function NavIcon({ children }: { children: ReactNode }) {
   );
 }
 
-// Etapas do pedido, cada uma um atalho pra /pedidos com o status certo já filtrado —
-// reaproveita a mesma tela de Pedidos (filtros, busca, indicadores), só muda o filtro inicial.
-const REQUEST_STAGES = [
-  { label: "Solicitação de compras", icon: "📝", status: "aguardando_aprovacao" },
-  { label: "Aprovação", icon: "✅", status: "aprovado" },
-  { label: "Cotação", icon: "💬", status: "em_cotacao" },
-  { label: "Pedido", icon: "📦", status: "pedido_enviado,aguardando_entrega,aguardando_retirada,recebido" },
-];
-
-function StageLink({ label, icon, status }: { label: string; icon: string; status: string }) {
-  const location = useLocation();
-  const currentStatus = new URLSearchParams(location.search).get("status");
-  const isActive = location.pathname === "/pedidos" && currentStatus === status;
-
+function CountBadge({ count }: { count: number }) {
+  if (count <= 0) return null;
   return (
-    <Link
-      to={`/pedidos?status=${encodeURIComponent(status)}`}
-      className={`flex items-center gap-2 rounded-md py-1.5 pl-9 pr-3 text-sm ${
-        isActive
-          ? "bg-blue-700 text-white dark:bg-blue-600"
-          : "text-neutral-500 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-800"
-      }`}
-    >
-      <span aria-hidden="true">{icon}</span> {label}
-    </Link>
+    <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-neutral-200 px-1.5 text-xs font-bold text-neutral-700 dark:bg-neutral-700 dark:text-neutral-200">
+      {count}
+    </span>
+  );
+}
+
+function SectionHeader({ children }: { children: ReactNode }) {
+  return (
+    <div className="mt-3 mb-1 px-3 text-xs font-semibold uppercase tracking-wide text-neutral-400 dark:text-neutral-600">
+      {children}
+    </div>
   );
 }
 
 export function Layout() {
   const { user, logout } = useAuth();
+  const [counts, setCounts] = useState<StageCounts | null>(null);
+
+  useEffect(() => {
+    api.get<StageCounts>("/purchase-requests/stage-counts").then(setCounts).catch(() => {});
+  }, []);
+
   if (!user) return null;
 
   return (
@@ -81,20 +78,35 @@ export function Layout() {
             <NavLink to="/dashboard" className={linkClass}>
               <NavIcon>📊</NavIcon> Dashboard
             </NavLink>
-            <NavLink to="/pedidos" className={linkClass} end>
-              <NavIcon>📄</NavIcon> Pedidos
-            </NavLink>
-            {REQUEST_STAGES.map((stage) => (
-              <StageLink key={stage.status} {...stage} />
-            ))}
             <NavLink to="/pedidos/novo" className={linkClass}>
               <NavIcon>➕</NavIcon> Novo pedido
             </NavLink>
+
+            <SectionHeader>Processo de compras</SectionHeader>
+            <NavLink to="/solicitacoes" className={linkClass}>
+              <NavIcon>📋</NavIcon> Solicitações
+            </NavLink>
+            <NavLink to="/aprovacoes" className={linkClass}>
+              <NavIcon>✅</NavIcon> Aprovações
+              <CountBadge count={counts?.aprovacoes ?? 0} />
+            </NavLink>
+            <NavLink to="/cotacoes" className={linkClass}>
+              <NavIcon>💬</NavIcon> Cotações
+              <CountBadge count={counts?.cotacoes ?? 0} />
+            </NavLink>
+            <NavLink to="/pedidos-enviados" className={linkClass}>
+              <NavIcon>📦</NavIcon> Pedidos
+            </NavLink>
+            <NavLink to="/recebimentos" className={linkClass}>
+              <NavIcon>🚚</NavIcon> Recebimentos
+            </NavLink>
+            <NavLink to="/pedidos" className={linkClass} end>
+              <NavIcon>🗃️</NavIcon> Todos os pedidos
+            </NavLink>
+
             {(user.role === "admin" || user.role === "comprador") && (
               <>
-                <div className="mt-3 mb-1 px-3 text-xs font-semibold uppercase tracking-wide text-neutral-400 dark:text-neutral-600">
-                  Compras
-                </div>
+                <SectionHeader>Gestão</SectionHeader>
                 <NavLink to="/fornecedores" className={linkClass}>
                   <NavIcon>🏢</NavIcon> Fornecedores
                 </NavLink>
@@ -105,9 +117,7 @@ export function Layout() {
             )}
             {user.role === "admin" && (
               <>
-                <div className="mt-3 mb-1 px-3 text-xs font-semibold uppercase tracking-wide text-neutral-400 dark:text-neutral-600">
-                  Administração
-                </div>
+                <SectionHeader>Administração</SectionHeader>
                 <NavLink to="/setores" className={linkClass}>
                   <NavIcon>🗂️</NavIcon> Setores
                 </NavLink>
@@ -123,9 +133,7 @@ export function Layout() {
               </>
             )}
 
-            <div className="mt-3 mb-1 px-3 text-xs font-semibold uppercase tracking-wide text-neutral-400 dark:text-neutral-600">
-              Conta
-            </div>
+            <SectionHeader>Conta</SectionHeader>
             <NavLink to="/minha-conta/senha" className={linkClass}>
               <NavIcon>🔒</NavIcon> Alterar senha
             </NavLink>

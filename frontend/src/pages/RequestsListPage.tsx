@@ -1,14 +1,9 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { api, ApiError } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import type { Department, PurchaseRequestStats, PurchaseRequestSummary, RequestStatus, Supplier, Urgency, User } from "../types";
-import { StatusBadge } from "../components/StatusBadge";
-import { PriorityBadge } from "../components/PriorityBadge";
-import { MiniStepper } from "../components/MiniStepper";
-import { categoryIcon } from "../lib/categoryIcon";
-import { formatRelativeDate } from "../lib/relativeDate";
-import { getRequestAlert } from "../lib/requestAlerts";
+import { RequestsTable } from "../components/RequestsTable";
 import { downloadCsv } from "../lib/exportCsv";
 import { cardClass, inputClass, labelClass } from "../components/ui";
 
@@ -51,22 +46,7 @@ function StatTile({ label, value }: { label: string; value: string | number }) {
   );
 }
 
-const HIGH_VALUE_THRESHOLD = 10000;
-
-function ValueCell({ value }: { value: string | null }) {
-  if (value === null) return <span className="text-neutral-400">—</span>;
-  const n = Number(value);
-  const isHigh = n >= HIGH_VALUE_THRESHOLD;
-  return (
-    <span className={isHigh ? "font-bold text-emerald-800 dark:text-emerald-400" : "font-medium"}>
-      {isHigh && <span aria-hidden="true">💰 </span>}
-      {formatMoney(n)}
-    </span>
-  );
-}
-
 export function RequestsListPage() {
-  const navigate = useNavigate();
   const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -168,15 +148,15 @@ export function RequestsListPage() {
     );
   }
 
-  function handleDuplicate(e: React.MouseEvent, id: string) {
-    e.stopPropagation();
-    navigate(`/pedidos/novo?duplicateFrom=${id}`);
-  }
-
   return (
     <div>
       <div className="mb-5 flex items-center justify-between">
-        <h1 className="text-xl font-semibold">Pedidos de compra</h1>
+        <div>
+          <h1 className="text-xl font-semibold">Todos os pedidos</h1>
+          <p className="text-sm text-neutral-500 dark:text-neutral-400">
+            Visão completa: pesquise e filtre por status, setor, solicitante, fornecedor, período, valor ou urgência.
+          </p>
+        </div>
         <button onClick={handleExportCsv} disabled={!requests?.length} className={`${inputClass} w-auto disabled:opacity-40`}>
           ⬇ Exportar CSV
         </button>
@@ -290,84 +270,8 @@ export function RequestsListPage() {
 
       {!requests ? (
         <p className="text-sm text-neutral-500">Carregando...</p>
-      ) : requests.length === 0 ? (
-        <div className={cardClass}>
-          <p className="text-sm text-neutral-500 dark:text-neutral-400">Nenhum pedido encontrado com esses filtros.</p>
-        </div>
       ) : (
-        <div className={`${cardClass} overflow-x-auto p-0`}>
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-neutral-200 text-neutral-500 dark:border-neutral-800 dark:text-neutral-400">
-              <tr>
-                <th className="px-4 py-3 font-medium">Título</th>
-                <th className="px-4 py-3 font-medium">Solicitante</th>
-                <th className="px-4 py-3 font-medium">Setor</th>
-                <th className="px-4 py-3 font-medium">Prioridade</th>
-                <th className="px-4 py-3 font-medium">Progresso</th>
-                <th className="px-4 py-3 font-medium">Fornecedor</th>
-                <th className="px-4 py-3 font-medium">Total estimado</th>
-                <th className="px-4 py-3 font-medium">Status</th>
-                <th className="px-4 py-3 font-medium">Criado</th>
-                <th className="px-4 py-3 font-medium">Alerta</th>
-                <th className="px-4 py-3 font-medium" />
-              </tr>
-            </thead>
-            <tbody>
-              {requests.map((r) => {
-                const alert = getRequestAlert(r);
-                return (
-                  <tr
-                    key={r.id}
-                    onClick={() => navigate(`/pedidos/${r.id}`)}
-                    className="cursor-pointer border-b border-neutral-100 last:border-0 hover:bg-neutral-50 dark:border-neutral-800 dark:hover:bg-neutral-800/50"
-                  >
-                    <td className="px-4 py-3 font-medium">
-                      <span className="mr-1.5" aria-hidden="true" title={r.department?.name ?? "Sem setor"}>
-                        {categoryIcon(r.department?.name)}
-                      </span>
-                      {r.requestNumber && <span className="text-neutral-400 dark:text-neutral-500">#{r.requestNumber} · </span>}
-                      {r.title}
-                    </td>
-                    <td className="px-4 py-3">{r.requester.name}</td>
-                    <td className="px-4 py-3">{r.department?.name ?? "—"}</td>
-                    <td className="px-4 py-3">
-                      <PriorityBadge urgency={r.urgency} />
-                    </td>
-                    <td className="px-4 py-3">
-                      <MiniStepper status={r.status} />
-                    </td>
-                    <td className="px-4 py-3">{r.quotes[0]?.supplierName ?? "—"}</td>
-                    <td className="px-4 py-3">
-                      <ValueCell value={r.estimatedTotal} />
-                    </td>
-                    <td className="px-4 py-3">
-                      <StatusBadge status={r.status} />
-                    </td>
-                    <td className="px-4 py-3 text-neutral-500 dark:text-neutral-400" title={formatDate(r.createdAt)}>
-                      {formatRelativeDate(r.createdAt)}
-                    </td>
-                    <td className="px-4 py-3">
-                      {alert && (
-                        <span className="inline-flex items-center gap-1 text-xs font-medium text-amber-700 dark:text-amber-400">
-                          ⚠️ {alert.text}
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <button
-                        onClick={(e) => handleDuplicate(e, r.id)}
-                        title="Duplicar pedido"
-                        className="text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200"
-                      >
-                        📄
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+        <RequestsTable requests={requests} emptyMessage="Nenhum pedido encontrado com esses filtros." />
       )}
     </div>
   );

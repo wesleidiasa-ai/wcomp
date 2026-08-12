@@ -146,6 +146,20 @@ export type PurchaseRequestStats = {
   valorTotalAberto: number;
 };
 
+export type StageCounts = {
+  solicitacoes: number;
+  aprovacoes: number;
+  cotacoes: number;
+  pedidos: number;
+  recebimentos: number;
+};
+
+export type StageStatItem = {
+  label: string;
+  value: number;
+  isMoney?: boolean;
+};
+
 export type PurchaseRequestDetail = Omit<PurchaseRequestSummary, "quotes"> & {
   justification: string | null;
   quoteDeadline: string | null;

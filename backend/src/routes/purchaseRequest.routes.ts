@@ -58,6 +58,34 @@ const OPEN_STATUSES = [
   "aguardando_retirada",
 ];
 
+const STALL_DAYS_THRESHOLD = 3;
+
+function scopeFor(req: { user?: { companyId: string; role: string; userId: string } }): Record<string, unknown> {
+  return {
+    companyId: req.user!.companyId,
+    // solicitante só enxerga os próprios pedidos; demais papéis veem tudo da empresa
+    ...(req.user!.role === "solicitante" ? { requesterId: req.user!.userId } : {}),
+  };
+}
+
+function startOfDay() {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+function startOfMonth() {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth(), 1);
+}
+
+function isLate(quote: { createdAt: Date; deliveryDays: number | null } | undefined) {
+  if (!quote?.deliveryDays) return false;
+  const expected = new Date(quote.createdAt);
+  expected.setDate(expected.getDate() + quote.deliveryDays);
+  return Date.now() > expected.getTime();
+}
+
 purchaseRequestRouter.get(
   "/",
   asyncHandler(async (req, res) => {
@@ -128,13 +156,8 @@ purchaseRequestRouter.get(
 purchaseRequestRouter.get(
   "/stats",
   asyncHandler(async (req, res) => {
-    const scope: Record<string, unknown> = {
-      companyId: req.user!.companyId,
-      ...(req.user!.role === "solicitante" ? { requesterId: req.user!.userId } : {}),
-    };
-
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const scope = scopeFor(req);
+    const today = startOfDay();
 
     const [abertos, aguardandoAprovacao, emCotacao, urgentes, recebidosHoje, openRequests] = await Promise.all([
       prisma.purchaseRequest.count({ where: { ...scope, status: { in: OPEN_STATUSES } } }),
@@ -155,6 +178,127 @@ purchaseRequestRouter.get(
     const valorTotalAberto = openRequests.reduce((sum, r) => sum + Number(r.estimatedTotal ?? 0), 0);
 
     res.json({ abertos, aguardandoAprovacao, emCotacao, urgentes, recebidosHoje, valorTotalAberto });
+  })
+);
+
+purchaseRequestRouter.get(
+  "/stage-counts",
+  asyncHandler(async (req, res) => {
+    const scope = scopeFor(req);
+
+    const [solicitacoes, aprovacoes, cotacoes, pedidos, recebimentos] = await Promise.all([
+      prisma.purchaseRequest.count({ where: scope }),
+      prisma.purchaseRequest.count({ where: { ...scope, status: "aguardando_aprovacao" } }),
+      prisma.purchaseRequest.count({ where: { ...scope, status: "em_cotacao" } }),
+      prisma.purchaseRequest.count({ where: { ...scope, status: "pedido_enviado" } }),
+      prisma.purchaseRequest.count({ where: { ...scope, status: { in: ["aguardando_entrega", "aguardando_retirada"] } } }),
+    ]);
+
+    res.json({ solicitacoes, aprovacoes, cotacoes, pedidos, recebimentos });
+  })
+);
+
+purchaseRequestRouter.get(
+  "/stage-summary",
+  asyncHandler(async (req, res) => {
+    const scope = scopeFor(req);
+    const stage = String(req.query.stage ?? "solicitacoes");
+
+    type StatItem = { label: string; value: number; isMoney?: boolean };
+
+    if (stage === "aprovacoes") {
+      const [pendentes, urgentes, aprovadasHoje] = await Promise.all([
+        prisma.purchaseRequest.count({ where: { ...scope, status: "aguardando_aprovacao" } }),
+        prisma.purchaseRequest.count({
+          where: { ...scope, status: "aguardando_aprovacao", urgency: { in: ["alta", "urgente"] } },
+        }),
+        prisma.purchaseRequest.count({
+          where: { ...scope, statusHistory: { some: { toStatus: "aprovado", changedAt: { gte: startOfDay() } } } },
+        }),
+      ]);
+      const items: StatItem[] = [
+        { label: "Pendentes", value: pendentes },
+        { label: "Urgentes", value: urgentes },
+        { label: "Aprovadas hoje", value: aprovadasHoje },
+      ];
+      res.json(items);
+      return;
+    }
+
+    if (stage === "cotacoes") {
+      const rows = await prisma.purchaseRequest.findMany({
+        where: { ...scope, status: "em_cotacao" },
+        select: { estimatedTotal: true, updatedAt: true, quotes: { select: { id: true } } },
+      });
+      const emCotacao = rows.length;
+      const aguardandoFornecedor = rows.filter((r) => r.quotes.length === 0).length;
+      const atrasadas = rows.filter((r) => Date.now() - r.updatedAt.getTime() >= STALL_DAYS_THRESHOLD * 24 * 60 * 60 * 1000).length;
+      const valorEmCotacao = rows.reduce((sum, r) => sum + Number(r.estimatedTotal ?? 0), 0);
+      const items: StatItem[] = [
+        { label: "Em cotação", value: emCotacao },
+        { label: "Aguardando fornecedor", value: aguardandoFornecedor },
+        { label: "Atrasadas", value: atrasadas },
+        { label: "Valor em cotação", value: valorEmCotacao, isMoney: true },
+      ];
+      res.json(items);
+      return;
+    }
+
+    if (stage === "pedidos") {
+      const rows = await prisma.purchaseRequest.findMany({
+        where: { ...scope, status: "pedido_enviado" },
+        select: {
+          estimatedTotal: true,
+          quotes: { where: { selected: true }, select: { createdAt: true, deliveryDays: true, totalPrice: true, freightValue: true } },
+        },
+      });
+      const enviados = rows.length;
+      const atrasados = rows.filter((r) => isLate(r.quotes[0])).length;
+      const valorTotal = rows.reduce((sum, r) => {
+        const q = r.quotes[0];
+        const total = q ? Number(q.totalPrice) + Number(q.freightValue ?? 0) : Number(r.estimatedTotal ?? 0);
+        return sum + total;
+      }, 0);
+      const items: StatItem[] = [
+        { label: "Enviados", value: enviados },
+        { label: "Atrasados", value: atrasados },
+        { label: "Valor total", value: valorTotal, isMoney: true },
+      ];
+      res.json(items);
+      return;
+    }
+
+    if (stage === "recebimentos") {
+      const [aguardandoEntrega, aguardandoRetirada, rows] = await Promise.all([
+        prisma.purchaseRequest.count({ where: { ...scope, status: "aguardando_entrega" } }),
+        prisma.purchaseRequest.count({ where: { ...scope, status: "aguardando_retirada" } }),
+        prisma.purchaseRequest.findMany({
+          where: { ...scope, status: { in: ["aguardando_entrega", "aguardando_retirada"] } },
+          select: { quotes: { where: { selected: true }, select: { createdAt: true, deliveryDays: true } } },
+        }),
+      ]);
+      const atrasados = rows.filter((r) => isLate(r.quotes[0])).length;
+      const items: StatItem[] = [
+        { label: "Aguardando entrega", value: aguardandoEntrega },
+        { label: "Aguardando retirada", value: aguardandoRetirada },
+        { label: "Atrasados", value: atrasados },
+      ];
+      res.json(items);
+      return;
+    }
+
+    // solicitações: visão ampla, sem filtro de status
+    const [total, esteMes, emAndamento] = await Promise.all([
+      prisma.purchaseRequest.count({ where: scope }),
+      prisma.purchaseRequest.count({ where: { ...scope, createdAt: { gte: startOfMonth() } } }),
+      prisma.purchaseRequest.count({ where: { ...scope, status: { notIn: ["recebido", "reprovado", "cancelado"] } } }),
+    ]);
+    const items: StatItem[] = [
+      { label: "Total", value: total },
+      { label: "Este mês", value: esteMes },
+      { label: "Em andamento", value: emAndamento },
+    ];
+    res.json(items);
   })
 );
 

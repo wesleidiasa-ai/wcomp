@@ -15,6 +15,7 @@ import { ResetPasswordPage } from "./pages/ResetPasswordPage";
 import { RequestsListPage } from "./pages/RequestsListPage";
 import { RequestDetailPage } from "./pages/RequestDetailPage";
 import { RequestCreatePage } from "./pages/RequestCreatePage";
+import { WorkQueuePage } from "./pages/WorkQueuePage";
 import { DepartmentsPage } from "./pages/DepartmentsPage";
 import { UsersPage } from "./pages/UsersPage";
 import { ApprovalRulesPage } from "./pages/ApprovalRulesPage";
@@ -45,6 +46,71 @@ export default function App() {
           <Route element={<ProtectedRoute />}>
             <Route element={<Layout />}>
               <Route path="/dashboard" element={<DashboardPage />} />
+              <Route
+                path="/solicitacoes"
+                element={
+                  <WorkQueuePage
+                    stage="solicitacoes"
+                    status="aguardando_aprovacao,aprovado,reprovado,em_cotacao,pedido_enviado,aguardando_entrega,aguardando_retirada,recebido,cancelado"
+                    icon="📋"
+                    title="Solicitações"
+                    description="Tudo que foi solicitado pelos usuários."
+                    emptyMessage="Nenhuma solicitação ainda."
+                  />
+                }
+              />
+              <Route
+                path="/aprovacoes"
+                element={
+                  <WorkQueuePage
+                    stage="aprovacoes"
+                    status="aguardando_aprovacao"
+                    icon="✅"
+                    title="Aprovações"
+                    description="Revise e aprove as solicitações de compra."
+                    emptyMessage="Nenhum pedido aguardando aprovação."
+                  />
+                }
+              />
+              <Route
+                path="/cotacoes"
+                element={
+                  <WorkQueuePage
+                    stage="cotacoes"
+                    status="em_cotacao"
+                    icon="💬"
+                    title="Cotações"
+                    description="Gerencie as cotações e compare as melhores condições de compra."
+                    emptyMessage="Nenhum pedido em cotação."
+                  />
+                }
+              />
+              <Route
+                path="/pedidos-enviados"
+                element={
+                  <WorkQueuePage
+                    stage="pedidos"
+                    status="pedido_enviado"
+                    icon="📦"
+                    title="Pedidos"
+                    description="Compras efetivamente encaminhadas aos fornecedores."
+                    emptyMessage="Nenhum pedido enviado ao fornecedor no momento."
+                  />
+                }
+              />
+              <Route
+                path="/recebimentos"
+                element={
+                  <WorkQueuePage
+                    stage="recebimentos"
+                    status="aguardando_entrega,aguardando_retirada"
+                    icon="🚚"
+                    title="Recebimentos"
+                    description="Compras aguardando entrega ou confirmação de recebimento."
+                    emptyMessage="Nenhuma compra aguardando entrega ou retirada."
+                  />
+                }
+              />
               <Route path="/pedidos" element={<RequestsListPage />} />
               <Route path="/pedidos/novo" element={<RequestCreatePage />} />
               <Route path="/pedidos/:id" element={<RequestDetailPage />} />
