@@ -3,7 +3,25 @@ import { Link, useParams } from "react-router-dom";
 import { api, ApiError } from "../lib/api";
 import type { SupplierDetail } from "../types";
 import { StatusBadge } from "../components/StatusBadge";
-import { cardClass } from "../components/ui";
+import { SupplierForm, type SupplierFormValues } from "../components/SupplierForm";
+import { buttonSecondaryClass, cardClass } from "../components/ui";
+
+function toFormValues(s: SupplierDetail): SupplierFormValues {
+  return {
+    name: s.name,
+    cnpj: s.cnpj ?? "",
+    phone: s.phone ?? "",
+    email: s.email ?? "",
+    addressStreet: s.addressStreet ?? "",
+    addressNumber: s.addressNumber ?? "",
+    addressComplement: s.addressComplement ?? "",
+    addressNeighborhood: s.addressNeighborhood ?? "",
+    addressCity: s.addressCity ?? "",
+    addressState: s.addressState ?? "",
+    addressZipCode: s.addressZipCode ?? "",
+    notes: s.notes ?? "",
+  };
+}
 
 function formatMoney(value: string | number | null) {
   if (value === null) return "—";
@@ -25,14 +43,17 @@ export function SupplierDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [supplier, setSupplier] = useState<SupplierDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [editing, setEditing] = useState(false);
 
-  useEffect(() => {
+  function load() {
     if (!id) return;
     api
       .get<SupplierDetail>(`/suppliers/${id}`)
       .then(setSupplier)
       .catch((err) => setError(err instanceof ApiError ? err.message : "Erro ao carregar fornecedor"));
-  }, [id]);
+  }
+
+  useEffect(load, [id]);
 
   if (error) return <p className="text-sm text-red-600 dark:text-red-400">{error}</p>;
   if (!supplier) return <p className="text-sm text-neutral-500">Carregando...</p>;
@@ -43,16 +64,36 @@ export function SupplierDetailPage() {
         ← Voltar para fornecedores
       </Link>
 
-      <div className={cardClass}>
-        <h1 className="text-xl font-semibold">{supplier.name}</h1>
-        <p className="text-sm text-neutral-500 dark:text-neutral-400">
-          {[supplier.phone, supplier.email, supplier.cnpj].filter(Boolean).join(" · ") || "Sem contato cadastrado"}
-        </p>
-        {formatAddress(supplier) && (
-          <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">{formatAddress(supplier)}</p>
-        )}
-        {supplier.notes && <p className="mt-3 text-sm text-neutral-700 dark:text-neutral-300">{supplier.notes}</p>}
-      </div>
+      {editing ? (
+        <SupplierForm
+          initialValues={toFormValues(supplier)}
+          submitLabel="Salvar alterações"
+          onCancel={() => setEditing(false)}
+          onSubmit={async (payload) => {
+            await api.patch(`/suppliers/${supplier.id}`, payload);
+            setEditing(false);
+            load();
+          }}
+        />
+      ) : (
+        <div className={cardClass}>
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h1 className="text-xl font-semibold">{supplier.name}</h1>
+              <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                {[supplier.phone, supplier.email, supplier.cnpj].filter(Boolean).join(" · ") || "Sem contato cadastrado"}
+              </p>
+              {formatAddress(supplier) && (
+                <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">{formatAddress(supplier)}</p>
+              )}
+              {supplier.notes && <p className="mt-3 text-sm text-neutral-700 dark:text-neutral-300">{supplier.notes}</p>}
+            </div>
+            <button type="button" onClick={() => setEditing(true)} className={`${buttonSecondaryClass} shrink-0`}>
+              Editar
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
         <div className={cardClass}>

@@ -135,17 +135,17 @@ supplierRouter.get(
 
 const supplierSchema = z.object({
   name: z.string().min(1),
-  cnpj: z.string().optional(),
-  phone: z.string().optional(),
-  email: z.string().email().optional(),
-  addressStreet: z.string().optional(),
-  addressNumber: z.string().optional(),
-  addressComplement: z.string().optional(),
-  addressNeighborhood: z.string().optional(),
-  addressCity: z.string().optional(),
-  addressState: z.string().optional(),
-  addressZipCode: z.string().optional(),
-  notes: z.string().optional(),
+  cnpj: z.string().nullable().optional(),
+  phone: z.string().nullable().optional(),
+  email: z.string().email().nullable().optional(),
+  addressStreet: z.string().nullable().optional(),
+  addressNumber: z.string().nullable().optional(),
+  addressComplement: z.string().nullable().optional(),
+  addressNeighborhood: z.string().nullable().optional(),
+  addressCity: z.string().nullable().optional(),
+  addressState: z.string().nullable().optional(),
+  addressZipCode: z.string().nullable().optional(),
+  notes: z.string().nullable().optional(),
 });
 
 supplierRouter.post(
