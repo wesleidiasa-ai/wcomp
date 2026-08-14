@@ -4,6 +4,7 @@ import { api, ApiError } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import type { Department, PurchaseRequestStats, PurchaseRequestSummary, RequestStatus, Supplier, Urgency, User } from "../types";
 import { RequestsTable } from "../components/RequestsTable";
+import { SearchableSelect } from "../components/SearchableSelect";
 import { downloadCsv } from "../lib/exportCsv";
 import { cardClass, inputClass, labelClass } from "../components/ui";
 
@@ -206,29 +207,23 @@ export function RequestsListPage() {
             </select>
           </div>
           {showMineControls && (
-            <div>
-              <label className={labelClass}>Solicitante</label>
-              <select className={inputClass} value={requesterId} onChange={(e) => setRequesterId(e.target.value)}>
-                <option value="">Todos</option>
-                {users.map((u) => (
-                  <option key={u.id} value={u.id}>
-                    {u.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <SearchableSelect
+              label="Solicitante"
+              placeholder="🔎 Buscar solicitante..."
+              value={requesterId}
+              onChange={setRequesterId}
+              options={users.map((u) => ({ id: u.id, label: u.name }))}
+              allLabel="Todos"
+            />
           )}
-          <div>
-            <label className={labelClass}>Fornecedor</label>
-            <select className={inputClass} value={supplierId} onChange={(e) => setSupplierId(e.target.value)}>
-              <option value="">Todos</option>
-              {suppliers.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name}
-                </option>
-              ))}
-            </select>
-          </div>
+          <SearchableSelect
+            label="Fornecedor"
+            placeholder="🔎 Buscar fornecedor..."
+            value={supplierId}
+            onChange={setSupplierId}
+            options={suppliers.map((s) => ({ id: s.id, label: s.name }))}
+            allLabel="Todos"
+          />
           <div>
             <label className={labelClass}>Urgência</label>
             <select className={inputClass} value={urgency} onChange={(e) => setUrgency(e.target.value as Urgency | "")}>
